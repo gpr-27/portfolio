@@ -7,7 +7,6 @@ services:
     name: praneeth-portfolio
     runtime: node
     plan: free
-    nodeVersion: "20"
     buildCommand: "npm install --include=dev && npm run build"
     startCommand: "npm start"
     envVars:
@@ -19,6 +18,8 @@ services:
       - key: RESEND_API_KEY
         sync: false
       # ── Non-secret config — committed here, applied automatically ──
+      - key: NODE_VERSION
+        value: "20"
       - key: MONGODB_DB
         value: portfolio
       - key: CONTACT_TO
