@@ -1247,7 +1247,8 @@ body.has-cursor textarea {
 .mast__socials {
   margin-top: 1.9rem;
   display: flex;
-  gap: 1.6rem;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.6rem;
 }
 .mast__social {
   display: inline-flex;
@@ -1257,9 +1258,19 @@ body.has-cursor textarea {
   border: none;
   color: var(--body);
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 .mast__social:hover {
   color: var(--primary);
+}
+@media (max-width: 480px) {
+  .mast__socials {
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .mast__social {
+    font-size: 0.85rem;
+  }
 }
 .mast__portrait {
   margin: 0;
