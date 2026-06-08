@@ -1,0 +1,87 @@
+/* ============================================================
+   DESIGN TOKENS — warm editorial system (Claude.com-inspired,
+   re-voiced for Praneeth). Cream + coral + dark-navy trinity.
+   Two modes: light (cream, default) and dark (night).
+   ============================================================ */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --canvas: #faf9f5;
+  --surface-soft: #f5f0e8;
+  --surface-card: #efe9de;
+  --surface-strong: #e8e0d2;
+  --surface-dark: #181715;
+  --surface-dark-elevated: #252320;
+  --surface-dark-soft: #1f1e1b;
+  --hairline: #e6dfd8;
+  --hairline-soft: #ebe6df;
+
+  /* Text */
+  --ink: #141413;
+  --body-strong: #252523;
+  --body: #3d3d3a;
+  --muted: #6c6a64;
+  --muted-soft: #8e8b82;
+  --on-primary: #ffffff;
+  --on-dark: #faf9f5;
+  --on-dark-soft: #a09d96;
+
+  /* Brand */
+  --primary: #cc785c;
+  --primary-active: #a9583e;
+  --primary-tint: rgba(204, 120, 92, 0.1);
+  --primary-rgb: 204, 120, 92;
+  --accent-teal: #5db8a6;
+  --accent-amber: #e8a55a;
+
+  /* Semantic */
+  --success: #5db872;
+  --warning: #d4a017;
+  --error: #c64545;
+
+  --shadow-soft: 0 1px 3px rgba(20, 20, 19, 0.08);
+  --shadow-card: 0 18px 40px -28px rgba(20, 20, 19, 0.22);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Surfaces — navy floor, cream ink */
+  --canvas: #181715;
+  --surface-soft: #1f1e1b;
+  --surface-card: #232120;
+  --surface-strong: #2b2825;
+  --surface-dark: #0f0e0d;
+  --surface-dark-elevated: #28251f;
+  --surface-dark-soft: #161513;
+  --hairline: #302c27;
+  --hairline-soft: #272420;
+
+  /* Text */
+  --ink: #faf9f5;
+  --body-strong: #ece8df;
+  --body: #cbc7bd;
+  --muted: #9b9890;
+  --muted-soft: #7c7a72;
+  --on-primary: #1a0f0a;
+  --on-dark: #faf9f5;
+  --on-dark-soft: #a09d96;
+
+  /* Brand — nudge coral brighter on dark for contrast */
+  --primary: #e08a6b;
+  --primary-active: #cc785c;
+  --primary-tint: rgba(224, 138, 107, 0.14);
+  --primary-rgb: 224, 138, 107;
+  --accent-teal: #5db8a6;
+  --accent-amber: #e8a55a;
+
+  --success: #5db872;
+  --warning: #d4a017;
+  --error: #d76b6b;
+
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 22px 48px -28px rgba(0, 0, 0, 0.6);
+}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#faf9f5" />
+
+    <title>Praneeth Reddy Gandra — AI/ML Engineer</title>
+    <meta
+      name="description"
+      content="Praneeth Reddy Gandra — AI/ML Engineer & CS undergrad at IIIT Tiruchirapalli. LLM fine-tuning, RAG, computer vision, and full-stack engineering."
+    />
+    <meta name="author" content="Praneeth Reddy Gandra" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Praneeth Reddy Gandra — AI/ML Engineer" />
+    <meta
+      property="og:description"
+      content="LLM fine-tuning, RAG, computer vision, and full-stack engineering. B.Tech CSE @ IIIT Tiruchirapalli."
+    />
+
+    <!-- Fonts: Cormorant Garamond (serif display) + Inter (body) + JetBrains Mono (code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Apply persisted theme before paint to avoid flash -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          var valid = ['light', 'dark'];
+          if (t && valid.indexOf(t) !== -1) {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

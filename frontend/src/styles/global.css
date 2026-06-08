@@ -1,0 +1,331 @@
+/* ============================================================
+   GLOBAL — editorial reset, typography, tokens, buttons.
+   Display: Cormorant Garamond (serif). Body: Inter. Code: JetBrains Mono.
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+img,
+svg,
+picture,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- Non-color tokens ---------- */
+:root {
+  --font-serif: 'Cormorant Garamond', 'EB Garamond', 'Tiempos Headline', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-pill: 9999px;
+
+  --sp-xxs: 4px;
+  --sp-xs: 8px;
+  --sp-sm: 12px;
+  --sp-md: 16px;
+  --sp-lg: 24px;
+  --sp-xl: 32px;
+  --sp-xxl: 48px;
+  --sp-section: clamp(4rem, 9vw, 6rem);
+
+  --maxw: 1200px;
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+
+  /* Editorial serif display scale */
+  --fs-display-xl: clamp(2.85rem, 6.4vw, 4.25rem);
+  --fs-display-lg: clamp(2.1rem, 4.6vw, 3rem);
+  --fs-display-md: clamp(1.6rem, 3.2vw, 2.25rem);
+  --fs-display-sm: clamp(1.4rem, 2.4vw, 1.75rem);
+
+  --fs-title-lg: 1.375rem;
+  --fs-title-md: 1.125rem;
+  --fs-title-sm: 1rem;
+  --fs-body: 1rem;
+  --fs-body-sm: 0.875rem;
+  --fs-caption: 0.8125rem;
+  --fs-code: 0.875rem;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --nav-h: 64px;
+}
+
+/* ---------- Base ---------- */
+body {
+  min-height: 100vh;
+  background-color: var(--canvas);
+  color: var(--body);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  font-weight: 400;
+  overflow-x: hidden;
+  transition: background-color 0.5s var(--ease), color 0.5s var(--ease);
+}
+
+::selection {
+  background: var(--primary-tint);
+  color: var(--ink);
+}
+
+/* ---------- Typography ---------- */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.coral {
+  color: var(--primary);
+}
+
+/* Inline editorial coral link */
+.text-link {
+  color: var(--primary);
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.text-link:hover {
+  border-color: currentColor;
+}
+
+/* Eyebrow / section kicker */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Layout primitives ---------- */
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.section {
+  padding-block: var(--sp-section);
+  position: relative;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 44px;
+  padding: 0 1.3rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s var(--ease), color 0.2s, border-color 0.2s, transform 0.2s var(--ease);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn-lg {
+  height: 50px;
+  padding: 0 1.7rem;
+  font-size: 0.95rem;
+}
+.btn-sm {
+  height: 38px;
+  padding: 0 1rem;
+  font-size: 0.84rem;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.btn-primary:hover {
+  background: var(--primary-active);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--hairline);
+}
+.btn-secondary:hover {
+  border-color: var(--muted);
+}
+
+.btn-on-dark {
+  background: var(--surface-dark-elevated);
+  color: var(--on-dark);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.btn-on-dark:hover {
+  background: #322e29;
+}
+
+.btn-cream {
+  background: var(--canvas);
+  color: var(--ink);
+}
+.btn-cream:hover {
+  background: #fff;
+}
+
+/* ---------- Badges / pills ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.28em 0.8em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--body);
+  background: var(--surface-card);
+  border-radius: var(--r-pill);
+}
+.badge-coral {
+  background: var(--primary);
+  color: var(--on-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+}
+.badge-outline {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--muted);
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 999px;
+  border: 3px solid var(--canvas);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-soft);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
+}
+
+/* ---------- Scroll progress (thin coral) ---------- */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: var(--primary);
+  z-index: 9997;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

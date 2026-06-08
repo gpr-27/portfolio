@@ -1,0 +1,38 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules
+dist
+dist-ssr
+*.local
+
+# Secrets / env — one root .env for the whole project (commit only the template)
+.env
+.env.*
+!.env.example
+render-upload.env
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Claude Code local config
+.claude/
+
+# Large source assets (originals — not served; built dist/ has what's needed)
+IMG_1605.heic
+IMG_1606.heic
+praneeth_final_resume_2026.pdf
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

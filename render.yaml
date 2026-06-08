@@ -1,0 +1,27 @@
+# Render Blueprint — single Node web service.
+# One Express server (backend/server.ts) serves the built frontend (repo-root
+# dist/) AND the POST /api/chat + POST /api/contact endpoints. No Vercel.
+# Render reads this file from the repo root on a Blueprint deploy.
+services:
+  - type: web
+    name: praneeth-portfolio
+    runtime: node
+    plan: free
+    nodeVersion: "20"
+    buildCommand: "npm install --include=dev && npm run build"
+    startCommand: "npm start"
+    envVars:
+      # ── Secrets — set these in the Render dashboard (never committed) ──
+      - key: GROQ_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      # ── Non-secret config — committed here, applied automatically ──
+      - key: MONGODB_DB
+        value: portfolio
+      - key: CONTACT_TO
+        value: praneethg1830@gmail.com
+      - key: CONTACT_FROM
+        value: "Portfolio <onboarding@resend.dev>"
