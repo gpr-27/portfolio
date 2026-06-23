@@ -74,7 +74,7 @@ export const projects: Project[] = [
     ],
     links: {
       github: 'https://github.com/gpr-27/study-assistant-hub',
-      demo: 'https://gprs-ai-study-assistant-hub.vercel.app',
+      demo: 'https://study-assistant-hub.onrender.com',
     },
     featured: true,
     award: '1st Place — IIIT Trichy Hackathon',
@@ -129,7 +129,10 @@ export const projects: Project[] = [
       { value: 70, suffix: 'B', label: 'Llama 3.3 Model' },
       { value: 1, label: 'Container, 0 CORS' },
     ],
-    links: { github: 'https://github.com/gpr-27/kairos-ai' },
+    links: {
+      github: 'https://github.com/gpr-27/kairos-ai',
+      demo: 'https://kairos-ai-zoxs.onrender.com',
+    },
     featured: true,
   },
   {
@@ -176,7 +179,7 @@ export const projects: Project[] = [
     stack: ['React 19', 'Vite', 'Express', 'MongoDB', 'Groq', 'Recharts'],
     links: {
       github: 'https://github.com/gpr-27/Hackhub',
-      demo: 'https://mental-health-app-027.netlify.app',
+      demo: 'https://aura-sqdv.onrender.com',
     },
   },
   {
@@ -193,7 +196,7 @@ export const projects: Project[] = [
     stack: ['React 19', 'Node/Express', 'MongoDB', 'Groq', 'Clerk', 'SSE'],
     links: {
       github: 'https://github.com/gpr-27/chatbot',
-      demo: 'https://gprs-chatbot.vercel.app',
+      demo: 'https://groqbot-coqy.onrender.com',
     },
   },
   {
@@ -208,21 +211,27 @@ export const projects: Project[] = [
       'Image sharing (Cloudinary), online presence, light/dark glass UI',
     ],
     stack: ['Node', 'Socket.IO', 'MongoDB', 'React', 'Zustand', 'WebRTC'],
-    links: { github: 'https://github.com/gpr-27/chat_app' },
+    links: {
+      github: 'https://github.com/gpr-27/chat_app',
+      demo: 'https://chat-app-3i3p.onrender.com',
+    },
   },
   {
-    id: 'magnivo-leadgen',
-    title: 'Magnivo AI Lead Workflow',
-    tagline: 'Automated B2B lead scraping, enrichment & AI scoring.',
-    kind: 'AI · Data Pipeline',
+    id: 'et-nucleus',
+    title: 'ET Nucleus — Persona-Aware News',
+    tagline: 'Business news that rewrites itself for who you are.',
+    kind: 'Full-Stack · AI',
     period: '2026',
     highlights: [
-      'Five-phase pipeline: scrape → dedupe → enrich → AI-score → output',
-      'Multi-source scrapers (Google, LinkedIn, JustDial, IndiaMART)',
-      'Email finding + SMTP verify, rule-based + GPT-4o-mini scoring to Google Sheets',
+      'Adaptive persona quiz + AI intent analysis classify your investor type & knowledge level',
+      'Deep-dive synthesis: one coherent briefing built from multiple articles, written for your level',
+      'Personalized feed — headlines rewritten for you, each with a /10 relevance score',
     ],
-    stack: ['Python', 'SerpAPI', 'Hunter.io', 'GPT-4o-mini', 'Google Sheets'],
-    links: { github: 'https://github.com/gpr-27/magnivo-ai-lead-workflow' },
+    stack: ['React', 'Vite', 'Express', 'Groq', 'Tailwind', 'Framer Motion'],
+    links: {
+      github: 'https://github.com/gpr-27/pramaan',
+      demo: 'https://et-nucleus.onrender.com',
+    },
   },
   {
     id: 'llm-finetune-sentiment',
@@ -241,20 +250,6 @@ export const projects: Project[] = [
       { value: 4, suffix: '-bit', label: 'Quantization' },
     ],
     links: {},
-  },
-  {
-    id: 'ads-analyzer',
-    title: 'Ads Creative Analyzer',
-    tagline: 'Vision-LLM scoring and next-test ideas for ad creatives.',
-    kind: 'AI · Vision-LLM',
-    period: '2026',
-    highlights: [
-      'Per-creative breakdown from a Llama-4 Scout vision model',
-      'Hybrid code score + LLM rubric adjustments, ranked “likely winners”',
-      '3–5 grounded next-test ideas per brand',
-    ],
-    stack: ['Streamlit', 'Python', 'Groq', 'Vision LLM'],
-    links: { github: 'https://github.com/gpr-27/atomic-vector-mini-assignment' },
   },
   {
     id: 'sms-spam',
