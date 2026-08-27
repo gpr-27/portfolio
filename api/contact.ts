@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'http'
-import { handleContact } from '../backend/lib/contact-core'
+import { handleContact } from '../backend/lib/contact-core.js'
 
 export default async function handler(
   req: IncomingMessage & { body?: any },

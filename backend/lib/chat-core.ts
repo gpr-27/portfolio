@@ -3,7 +3,7 @@ import {
   DEFAULT_MODEL_ID,
   AVAILABLE_MODELS,
   type UnifiedUsage,
-} from './agentrouter'
+} from './agentrouter.js'
 
 // Chat handler used by the Express server (backend/server.ts) and the
 // Vite dev middleware (vite.config.ts). One source of truth — no dupes.
