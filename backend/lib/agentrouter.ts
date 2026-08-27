@@ -97,7 +97,7 @@ const OPENAI_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/chat/completions`
 const ANTHROPIC_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/messages`
 
 function getApiKey(env: Env): string {
-  const key = env.AGENTROUTER_API_KEY || env.GROQ_API_KEY || ''
+  const key = env.AGENTROUTER_API_KEY || ''
   if (!key) {
     throw new Error('AGENTROUTER_API_KEY is not configured on the server.')
   }

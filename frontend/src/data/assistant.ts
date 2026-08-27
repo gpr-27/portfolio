@@ -1,6 +1,6 @@
 /* ============================================================
    AI ASSISTANT — grounded ONLY in what's on this site.
-   - CHAT_ENDPOINT: set to your Supabase Edge Function URL to use Groq.
+   - CHAT_ENDPOINT: API endpoint to use AgentRouter (DeepSeek V4 Flash, GPT-5.6 Sol, Claude Opus 5/4.8).
    - Until then, localAnswer() is a smart offline fallback built from
      the same on-page data. It speaks in first person (as Praneeth),
      answers greetings + "what can you do", and REFUSES anything
