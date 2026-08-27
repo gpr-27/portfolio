@@ -1,5 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'http'
-import { handleChat } from '../backend/lib/chat-core'
+import { handleChat } from '../backend/lib/chat-core.js'
+
+export const config = {
+  regions: ['sin1'],
+}
 
 export default async function handler(
   req: IncomingMessage & { body?: any },

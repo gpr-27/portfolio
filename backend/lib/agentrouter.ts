@@ -98,11 +98,14 @@ const ANTHROPIC_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/messages`
 
 const AGENTROUTER_HEADERS = {
   'content-type': 'application/json',
-  'user-agent': 'Anthropic/Python 1.0.0',
+  'accept': 'application/json',
+  'user-agent': 'Anthropic/Python 0.34.0',
   'x-stainless-lang': 'python',
+  'x-stainless-package-version': '0.34.0',
   'x-stainless-os': 'MacOS',
   'x-stainless-arch': 'arm64',
   'x-stainless-runtime': 'CPython',
+  'x-stainless-runtime-version': '3.11.0',
 }
 
 function getApiKey(env: Env): string {
@@ -146,14 +149,17 @@ async function callOpenAICompatible(
     }),
   })
 
+  const rawText = await response.text()
+  let data: any
+
+  try {
+    data = JSON.parse(rawText)
+  } catch {
+    throw new Error(`AgentRouter returned non-JSON response (${response.status}): ${rawText.slice(0, 200)}`)
+  }
+
   if (!response.ok) {
-    let errDetail = ''
-    try {
-      const errJson = await response.json()
-      errDetail = errJson?.error?.message || JSON.stringify(errJson)
-    } catch {
-      errDetail = response.statusText
-    }
+    const errDetail = data?.error?.message || JSON.stringify(data)
 
     if (response.status === 401 || response.status === 403) {
       throw new Error(`Unauthorized: ${errDetail || 'Invalid AgentRouter API key.'}`)
@@ -167,7 +173,6 @@ async function callOpenAICompatible(
     throw new Error(`AgentRouter OpenAI API error (${response.status}): ${errDetail}`)
   }
 
-  const data = await response.json()
   const choice = data?.choices?.[0]
   let text = choice?.message?.content ?? ''
   const reasoning = choice?.message?.reasoning_content ?? choice?.message?.reasoning ?? ''
@@ -230,14 +235,17 @@ async function callAnthropicCompatible(
     body: JSON.stringify(payload),
   })
 
+  const rawText = await response.text()
+  let data: any
+
+  try {
+    data = JSON.parse(rawText)
+  } catch {
+    throw new Error(`AgentRouter returned non-JSON response (${response.status}): ${rawText.slice(0, 200)}`)
+  }
+
   if (!response.ok) {
-    let errDetail = ''
-    try {
-      const errJson = await response.json()
-      errDetail = errJson?.error?.message || JSON.stringify(errJson)
-    } catch {
-      errDetail = response.statusText
-    }
+    const errDetail = data?.error?.message || JSON.stringify(data)
 
     if (response.status === 401 || response.status === 403) {
       throw new Error(`Unauthorized: ${errDetail || 'Invalid AgentRouter API key.'}`)
@@ -250,8 +258,6 @@ async function callAnthropicCompatible(
     }
     throw new Error(`AgentRouter Anthropic API error (${response.status}): ${errDetail}`)
   }
-
-  const data = await response.json()
 
   // Extract text and optional thinking blocks from Anthropic response structure
   let text = ''

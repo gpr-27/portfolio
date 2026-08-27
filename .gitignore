@@ -36,3 +36,5 @@ praneeth_final_resume_2026.pdf
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*

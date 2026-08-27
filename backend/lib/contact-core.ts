@@ -2,7 +2,7 @@
 // AND (if RESEND_API_KEY is set) emails a notification to the owner, with the
 // visitor's address as reply-to so you can reply straight from Gmail.
 
-import { getDb } from './mongo'
+import { getDb } from './mongo.js'
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 const OWNER_EMAIL = 'praneethg1830@gmail.com'

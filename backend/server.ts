@@ -2,8 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { handleChat } from './lib/chat-core';
-import { handleContact } from './lib/contact-core';
+import { handleChat } from './lib/chat-core.js';
+import { handleContact } from './lib/contact-core.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
