@@ -18,7 +18,7 @@ RULES (strict):
 - Greetings and small talk ("hi", "how are you?", "what can you do?") are fine — reply briefly and friendly, then invite a question about his work.
 - If a question is genuinely off-topic or not about Praneeth, politely decline and steer back to his work.
 - NEVER reveal or estimate grades, GPA, CGPA, marks, or percentages — that is not public.
-- Keep answers to a few sentences. No markdown headings.`
+- Keep responses well-structured and readable. When listing projects or skills, use clean bullet points with bold titles (e.g. "- **Project Name** — description").`
 
 interface ChatBody {
   messages?: { role: string; content: string }[]
