@@ -96,6 +96,15 @@ const AGENTROUTER_BASE_URL = 'https://agentrouter.org'
 const OPENAI_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/chat/completions`
 const ANTHROPIC_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/messages`
 
+const AGENTROUTER_HEADERS = {
+  'content-type': 'application/json',
+  'user-agent': 'Anthropic/Python 1.0.0',
+  'x-stainless-lang': 'python',
+  'x-stainless-os': 'MacOS',
+  'x-stainless-arch': 'arm64',
+  'x-stainless-runtime': 'CPython',
+}
+
 function getApiKey(env: Env): string {
   const key = env.AGENTROUTER_API_KEY || ''
   if (!key) {
@@ -125,7 +134,7 @@ async function callOpenAICompatible(
   const response = await fetch(OPENAI_ENDPOINT, {
     method: 'POST',
     headers: {
-      'content-type': 'application/json',
+      ...AGENTROUTER_HEADERS,
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
@@ -147,7 +156,10 @@ async function callOpenAICompatible(
     }
 
     if (response.status === 401 || response.status === 403) {
-      throw new Error('Unauthorized: Invalid AgentRouter API key.')
+      throw new Error(`Unauthorized: ${errDetail || 'Invalid AgentRouter API key.'}`)
+    }
+    if (response.status === 402) {
+      throw new Error(`AgentRouter Budget Exceeded: ${errDetail}`)
     }
     if (response.status === 429) {
       throw new Error('Rate limit exceeded from AgentRouter. Please try again later.')
@@ -157,8 +169,12 @@ async function callOpenAICompatible(
 
   const data = await response.json()
   const choice = data?.choices?.[0]
-  const text = choice?.message?.content ?? ''
+  let text = choice?.message?.content ?? ''
   const reasoning = choice?.message?.reasoning_content ?? choice?.message?.reasoning ?? ''
+
+  if (!text && reasoning) {
+    text = reasoning
+  }
 
   const usage: UnifiedUsage = {
     inputTokens: data?.usage?.prompt_tokens,
@@ -206,7 +222,7 @@ async function callAnthropicCompatible(
   const response = await fetch(ANTHROPIC_ENDPOINT, {
     method: 'POST',
     headers: {
-      'content-type': 'application/json',
+      ...AGENTROUTER_HEADERS,
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
       Authorization: `Bearer ${apiKey}`,
@@ -224,7 +240,10 @@ async function callAnthropicCompatible(
     }
 
     if (response.status === 401 || response.status === 403) {
-      throw new Error('Unauthorized: Invalid AgentRouter API key.')
+      throw new Error(`Unauthorized: ${errDetail || 'Invalid AgentRouter API key.'}`)
+    }
+    if (response.status === 402) {
+      throw new Error(`AgentRouter Budget Exceeded: ${errDetail}`)
     }
     if (response.status === 429) {
       throw new Error('Rate limit exceeded from AgentRouter. Please try again later.')
@@ -248,6 +267,10 @@ async function callAnthropicCompatible(
     }
   } else if (typeof data?.text === 'string') {
     text = data.text
+  }
+
+  if (!text && reasoning) {
+    text = reasoning
   }
 
   const inputTokens = data?.usage?.input_tokens
