@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: praneeth-portfolio
     container_name: praneeth-portfolio
-    # Load runtime secrets/config from the root .env (Groq, MongoDB, Resend, etc.).
+    # Load runtime secrets/config from the root .env (AgentRouter, MongoDB, Resend, etc.).
     env_file:
       - .env
     environment:
