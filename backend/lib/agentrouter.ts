@@ -99,7 +99,10 @@ const ANTHROPIC_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/messages`
 const AGENTROUTER_HEADERS = {
   'content-type': 'application/json',
   'accept': 'application/json',
-  'user-agent': 'Anthropic/Python 0.34.0',
+  'user-agent': 'claude-cli/2.1.195 (external, cli)',
+  'x-app': 'cli',
+  'anthropic-version': '2023-06-01',
+  'anthropic-dangerous-direct-browser-access': 'true',
   'x-stainless-lang': 'python',
   'x-stainless-package-version': '0.34.0',
   'x-stainless-os': 'MacOS',
