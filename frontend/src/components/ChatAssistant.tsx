@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BrandMark } from './BrandMark'
+import { FormattedMessage } from './FormattedMessage'
 import {
   AI_MODELS,
   DEFAULT_MODEL_ID,
@@ -27,6 +28,7 @@ function newSessionId() {
 
 export function ChatAssistant() {
   const [open, setOpen] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_MODEL_ID)
   const [showModelPicker, setShowModelPicker] = useState(false)
   // In-memory only → every visit AND every reload starts a fresh chat.
@@ -40,7 +42,7 @@ export function ChatAssistant() {
 
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, busy, open])
+  }, [messages, busy, open, expanded])
 
   async function respond(history: Msg[]) {
     setBusy(true)
@@ -106,7 +108,7 @@ export function ChatAssistant() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="chat"
+            className={`chat${expanded ? ' is-expanded' : ''}`}
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -199,17 +201,36 @@ export function ChatAssistant() {
                 </div>
               </div>
 
-              <button className="chat__close" onClick={() => setOpen(false)} aria-label="Close">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
-                  <path d="M6 6l12 12M18 6 6 18" />
-                </svg>
-              </button>
+              <div className="chat__head-actions">
+                <button
+                  type="button"
+                  className="chat__action-btn"
+                  onClick={() => setExpanded((prev) => !prev)}
+                  title={expanded ? 'Minimize chat size' : 'Expand chat window'}
+                  aria-label={expanded ? 'Minimize chat size' : 'Expand chat window'}
+                >
+                  {expanded ? (
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                    </svg>
+                  )}
+                </button>
+                <button className="chat__close" onClick={() => setOpen(false)} aria-label="Close">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </div>
             </header>
 
             <div className="chat__body" ref={bodyRef} data-lenis-prevent onClick={() => setShowModelPicker(false)}>
               {messages.map((m, i) => (
                 <div key={i} className={`bubble bubble--${m.role}`}>
-                  {m.content}
+                  <FormattedMessage content={m.content} />
                 </div>
               ))}
               {busy && (
