@@ -11,7 +11,7 @@ services:
     startCommand: "npm start"
     envVars:
       # ── Secrets — set these in the Render dashboard (never committed) ──
-      - key: GROQ_API_KEY
+      - key: AGENTROUTER_API_KEY
         sync: false
       - key: MONGODB_URI
         sync: false
