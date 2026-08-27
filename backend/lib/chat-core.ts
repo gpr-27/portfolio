@@ -1,9 +1,14 @@
+import {
+  chat,
+  DEFAULT_MODEL_ID,
+  AVAILABLE_MODELS,
+  type UnifiedUsage,
+} from './agentrouter'
+
 // Chat handler used by the Express server (backend/server.ts) and the
 // Vite dev middleware (vite.config.ts). One source of truth — no dupes.
 // FACTS arrive per request as `knowledge` (built on the client from
 // resume.ts + projects.ts), so nothing about Praneeth is hardcoded here.
-
-const MODEL = 'llama-3.3-70b-versatile'
 
 const RULES = `You are the assistant on Praneeth Reddy Gandra's portfolio website.
 Speak in the first person as Praneeth — warm, natural, and concise.
@@ -19,7 +24,16 @@ interface ChatBody {
   messages?: { role: string; content: string }[]
   sessionId?: string | null
   knowledge?: string
+  model?: string
 }
+
+export interface ChatResponse {
+  reply: string
+  model?: string
+  usage?: UnifiedUsage
+  reasoning?: string
+}
+
 type Env = Record<string, string | undefined>
 
 let cached: unknown = null
@@ -41,34 +55,52 @@ async function logToMongo(env: Env, doc: Record<string, unknown>) {
   }
 }
 
-export async function handleChat(body: ChatBody, env: Env): Promise<{ reply: string }> {
-  const { messages = [], sessionId = null, knowledge = '' } = body
+export async function handleChat(body: ChatBody, env: Env): Promise<ChatResponse> {
+  const { messages = [], sessionId = null, knowledge = '', model } = body
+  const selectedModel = (model && AVAILABLE_MODELS[model]) ? model : DEFAULT_MODEL_ID
+
   const trimmed = messages.slice(-8).map((m) => ({
-    role: m.role === 'user' ? 'user' : 'assistant',
+    role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
     content: String(m.content).slice(0, 2000),
   }))
 
   const systemPrompt = `${RULES}\n\nFACTS:\n${String(knowledge).slice(0, 6000)}`
 
-  const groq = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.GROQ_API_KEY}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      temperature: 0.5,
-      max_tokens: 500,
-      messages: [{ role: 'system', content: systemPrompt }, ...trimmed],
-    }),
-  })
-  const data = await groq.json()
-  const reply: string =
-    data?.choices?.[0]?.message?.content ?? 'Sorry — I had trouble answering just now.'
+  let reply = 'Sorry — I had trouble answering just now.'
+  let usage: UnifiedUsage | undefined
+  let reasoning: string | undefined
+
+  try {
+    const result = await chat(
+      {
+        model: selectedModel,
+        messages: trimmed,
+        system: systemPrompt,
+        temperature: 0.5,
+        maxTokens: 1024,
+      },
+      env
+    )
+    if (result.text) {
+      reply = result.text
+    }
+    usage = result.usage
+    reasoning = result.reasoning
+  } catch (err: unknown) {
+    // Fallback safe error response
+    console.error('AgentRouter chat error:', (err as Error)?.message || err)
+    reply = 'Unable to generate a response. Please try again.'
+  }
 
   const question = [...trimmed].reverse().find((m) => m.role === 'user')?.content ?? ''
-  await logToMongo(env, { sessionId, question, answer: reply, createdAt: new Date() })
+  await logToMongo(env, {
+    sessionId,
+    question,
+    answer: reply,
+    model: selectedModel,
+    usage,
+    createdAt: new Date(),
+  })
 
-  return { reply }
+  return { reply, model: selectedModel, usage, reasoning }
 }

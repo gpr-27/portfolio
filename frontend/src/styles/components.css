@@ -1042,10 +1042,16 @@ body.has-cursor textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.8rem;
   padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--hairline);
   background: var(--surface-card);
+  position: relative;
+}
+.chat__head-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 .chat__id {
   display: flex;
@@ -1060,12 +1066,107 @@ body.has-cursor textarea {
 .chat__id strong {
   font-family: var(--font-serif);
   font-weight: 600;
-  font-size: 1.02rem;
+  font-size: 0.98rem;
   color: var(--ink);
 }
 .chat__id em {
   font-style: normal;
   font-size: 0.72rem;
+  color: var(--muted);
+}
+.chat__model-select-wrapper {
+  position: relative;
+}
+.chat__model-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--body);
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.chat__model-btn:hover {
+  background: var(--surface-strong);
+  border-color: var(--primary);
+  color: var(--ink);
+}
+.chat__model-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+.chat__model-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat__model-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 100;
+  width: 220px;
+  padding: 0.4rem;
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.chat__model-menu-title {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding: 0.3rem 0.5rem 0.2rem;
+}
+.chat__model-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--body);
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.chat__model-option:hover {
+  background: var(--surface-strong);
+  color: var(--ink);
+}
+.chat__model-option.is-active {
+  background: var(--surface-card);
+  color: var(--primary);
+  font-weight: 600;
+}
+.chat__model-option-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.chat__model-option-name {
+  font-size: 0.8rem;
+}
+.chat__model-option-tag {
+  font-size: 0.68rem;
   color: var(--muted);
 }
 .chat__close {

@@ -10,12 +10,27 @@
 import { achievement, certifications, education, profile, skillGroups, socials } from './resume'
 import { projects } from './projects'
 
+export interface ModelOption {
+  id: string
+  name: string
+  tag: string
+}
+
+export const AI_MODELS: ModelOption[] = [
+  { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash', tag: 'Fast' },
+  { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', tag: 'Smart' },
+  { id: 'claude-opus-5', name: 'Claude Opus 5', tag: 'Reasoning' },
+  { id: 'claude-opus-4-8', name: 'Claude Opus 4.8', tag: 'Accurate' },
+]
+
+export const DEFAULT_MODEL_ID = 'deepseek-v4-flash'
+
 /**
- * Backend API path. Defaults to the same-origin Vercel function `/api/chat`
- * (works once GROQ_API_KEY + MONGODB_URI are set on Vercel). If the request
- * fails (e.g. local `vite dev` or a static host with no backend), the widget
+ * Backend API path. Defaults to the same-origin `/api/chat`
+ * (served via Express or Vite dev proxy). If the request
+ * fails (e.g. local preview without backend), the widget
  * falls back to the offline demo answers below. Override via VITE_CHAT_ENDPOINT.
- * Only a PUBLIC path — all secrets stay server-side in the function.
+ * Only a PUBLIC path — all secrets stay server-side in the backend.
  */
 export const CHAT_ENDPOINT =
   (import.meta.env.VITE_CHAT_ENDPOINT as string | undefined) ?? '/api/chat'
