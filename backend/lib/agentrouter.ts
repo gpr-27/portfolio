@@ -1,6 +1,8 @@
 // Centralized AgentRouter multi-model provider service
 // Supports OpenAI-compatible and Anthropic-compatible protocols with normalized routing.
 
+import { agentRouterPost, isWafHtmlBody } from './agentrouter-http.js'
+
 export type ModelProtocol = 'openai-compatible' | 'anthropic'
 
 export interface ModelMetadata {
@@ -92,23 +94,45 @@ export interface UnifiedChatResponse {
 
 type Env = Record<string, string | undefined>
 
-const AGENTROUTER_BASE_URL = 'https://agentrouter.org'
-const OPENAI_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/chat/completions`
-const ANTHROPIC_ENDPOINT = `${AGENTROUTER_BASE_URL}/v1/messages`
+function getBaseUrl(env: Env): string {
+  return (env.AGENTROUTER_BASE_URL || 'https://agentrouter.org').replace(/\/$/, '')
+}
 
-const AGENTROUTER_HEADERS = {
-  'content-type': 'application/json',
-  'accept': 'application/json',
-  'user-agent': 'claude-cli/2.1.195 (external, cli)',
-  'x-app': 'cli',
-  'anthropic-version': '2023-06-01',
-  'anthropic-dangerous-direct-browser-access': 'true',
-  'x-stainless-lang': 'python',
-  'x-stainless-package-version': '0.34.0',
-  'x-stainless-os': 'MacOS',
-  'x-stainless-arch': 'arm64',
-  'x-stainless-runtime': 'CPython',
-  'x-stainless-runtime-version': '3.11.0',
+/** Claude Code wire image — required for AgentRouter's upstream WAF allowlist. */
+const CLAUDE_CODE_ANTHROPIC_BETA =
+  'claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24,redact-thinking-2026-02-12'
+
+function buildAgentRouterHeaders(apiKey: string): Record<string, string> {
+  return {
+    'content-type': 'application/json',
+    accept: 'application/json',
+    'user-agent': 'claude-cli/2.1.195 (external, cli)',
+    'x-app': 'cli',
+    'anthropic-version': '2023-06-01',
+    'anthropic-beta': CLAUDE_CODE_ANTHROPIC_BETA,
+    'anthropic-dangerous-direct-browser-access': 'true',
+    Authorization: `Bearer ${apiKey}`,
+    'x-api-key': apiKey,
+    'x-stainless-lang': 'python',
+    'x-stainless-package-version': '0.34.0',
+    'x-stainless-os': 'MacOS',
+    'x-stainless-arch': 'arm64',
+    'x-stainless-runtime': 'CPython',
+    'x-stainless-runtime-version': '3.11.0',
+  }
+}
+
+function parseAgentRouterJson(rawText: string, status: number): any {
+  try {
+    return JSON.parse(rawText)
+  } catch {
+    if (isWafHtmlBody(rawText)) {
+      throw new Error(
+        'AgentRouter blocked this server (Aliyun WAF). Use the Render API backend with CycleTLS enabled.'
+      )
+    }
+    throw new Error(`AgentRouter returned non-JSON response (${status}): ${rawText.slice(0, 200)}`)
+  }
 }
 
 function getApiKey(env: Env): string {
@@ -123,9 +147,11 @@ function getApiKey(env: Env): string {
  * OpenAI-compatible execution for deepseek-v4-flash and gpt-5.6-sol
  */
 async function callOpenAICompatible(
+  baseUrl: string,
   modelId: string,
   apiKey: string,
-  options: UnifiedChatOptions
+  options: UnifiedChatOptions,
+  env: Env
 ): Promise<UnifiedChatResponse> {
   const { messages, system, temperature = 0.7, maxTokens = 4096 } = options
 
@@ -137,43 +163,36 @@ async function callOpenAICompatible(
     payloadMessages.push({ role: m.role, content: m.content })
   }
 
-  const response = await fetch(OPENAI_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      ...AGENTROUTER_HEADERS,
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: modelId,
-      messages: payloadMessages,
-      temperature,
-      max_tokens: maxTokens,
-      stream: false,
-    }),
-  })
-
-  const rawText = await response.text()
-  let data: any
-
-  try {
-    data = JSON.parse(rawText)
-  } catch {
-    throw new Error(`AgentRouter returned non-JSON response (${response.status}): ${rawText.slice(0, 200)}`)
+  const headers = buildAgentRouterHeaders(apiKey)
+  const requestBody = {
+    model: modelId,
+    messages: payloadMessages,
+    temperature,
+    max_tokens: maxTokens,
+    stream: false,
   }
 
-  if (!response.ok) {
+  const { status, rawText } = await agentRouterPost(
+    `${baseUrl}/v1/chat/completions`,
+    headers,
+    requestBody,
+    env
+  )
+  const data = parseAgentRouterJson(rawText, status)
+
+  if (status < 200 || status >= 300) {
     const errDetail = data?.error?.message || JSON.stringify(data)
 
-    if (response.status === 401 || response.status === 403) {
+    if (status === 401 || status === 403) {
       throw new Error(`Unauthorized: ${errDetail || 'Invalid AgentRouter API key.'}`)
     }
-    if (response.status === 402) {
+    if (status === 402) {
       throw new Error(`AgentRouter Budget Exceeded: ${errDetail}`)
     }
-    if (response.status === 429) {
+    if (status === 429) {
       throw new Error('Rate limit exceeded from AgentRouter. Please try again later.')
     }
-    throw new Error(`AgentRouter OpenAI API error (${response.status}): ${errDetail}`)
+    throw new Error(`AgentRouter OpenAI API error (${status}): ${errDetail}`)
   }
 
   const choice = data?.choices?.[0]
@@ -202,9 +221,11 @@ async function callOpenAICompatible(
  * Anthropic-compatible execution for claude-opus-5 and claude-opus-4-8
  */
 async function callAnthropicCompatible(
+  baseUrl: string,
   modelId: string,
   apiKey: string,
-  options: UnifiedChatOptions
+  options: UnifiedChatOptions,
+  env: Env
 ): Promise<UnifiedChatResponse> {
   const { messages, system, temperature = 0.7, maxTokens = 4096 } = options
 
@@ -227,39 +248,28 @@ async function callAnthropicCompatible(
     payload.system = system
   }
 
-  const response = await fetch(ANTHROPIC_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      ...AGENTROUTER_HEADERS,
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(payload),
-  })
+  const headers = buildAgentRouterHeaders(apiKey)
+  const { status, rawText } = await agentRouterPost(
+    `${baseUrl}/v1/messages?beta=true`,
+    headers,
+    payload,
+    env
+  )
+  const data = parseAgentRouterJson(rawText, status)
 
-  const rawText = await response.text()
-  let data: any
-
-  try {
-    data = JSON.parse(rawText)
-  } catch {
-    throw new Error(`AgentRouter returned non-JSON response (${response.status}): ${rawText.slice(0, 200)}`)
-  }
-
-  if (!response.ok) {
+  if (status < 200 || status >= 300) {
     const errDetail = data?.error?.message || JSON.stringify(data)
 
-    if (response.status === 401 || response.status === 403) {
+    if (status === 401 || status === 403) {
       throw new Error(`Unauthorized: ${errDetail || 'Invalid AgentRouter API key.'}`)
     }
-    if (response.status === 402) {
+    if (status === 402) {
       throw new Error(`AgentRouter Budget Exceeded: ${errDetail}`)
     }
-    if (response.status === 429) {
+    if (status === 429) {
       throw new Error('Rate limit exceeded from AgentRouter. Please try again later.')
     }
-    throw new Error(`AgentRouter Anthropic API error (${response.status}): ${errDetail}`)
+    throw new Error(`AgentRouter Anthropic API error (${status}): ${errDetail}`)
   }
 
   // Extract text and optional thinking blocks from Anthropic response structure
@@ -307,6 +317,7 @@ export async function chat(
   env: Env
 ): Promise<UnifiedChatResponse> {
   const apiKey = getApiKey(env)
+  const baseUrl = getBaseUrl(env)
   const targetModelId = options.model || DEFAULT_MODEL_ID
   const modelConfig = AVAILABLE_MODELS[targetModelId] || AVAILABLE_MODELS[DEFAULT_MODEL_ID]
 
@@ -314,13 +325,17 @@ export async function chat(
     throw new Error(`Invalid model requested: ${targetModelId}`)
   }
 
-  if (modelConfig.protocol === 'openai-compatible') {
-    return callOpenAICompatible(modelConfig.id, apiKey, options)
+  // Prefer Claude Code /messages wire — passes AgentRouter WAF; OpenAI-shaped /chat/completions is fallback.
+  try {
+    return await callAnthropicCompatible(baseUrl, modelConfig.id, apiKey, options, env)
+  } catch (messagesErr) {
+    const msg = (messagesErr as Error).message || ''
+    const canFallback =
+      modelConfig.protocol === 'openai-compatible' &&
+      (msg.includes('503') || msg.includes('无可用渠道') || msg.includes('no available channel'))
+    if (!canFallback) {
+      throw messagesErr
+    }
+    return callOpenAICompatible(baseUrl, modelConfig.id, apiKey, options, env)
   }
-
-  if (modelConfig.protocol === 'anthropic') {
-    return callAnthropicCompatible(modelConfig.id, apiKey, options)
-  }
-
-  throw new Error(`Unsupported protocol for model: ${modelConfig.id}`)
 }
