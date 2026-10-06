@@ -14,7 +14,6 @@ backend/scripts/pydeps
 .env
 .env.*
 !.env.example
-render-upload.env
 
 # TypeScript incremental build cache
 *.tsbuildinfo

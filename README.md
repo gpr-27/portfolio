@@ -22,7 +22,7 @@ frontend/             ← Vite app
   public/             ← static assets (resume.pdf, photo, favicon)
 
 api/                  ← Vercel serverless functions
-  chat.ts             ← POST /api/chat
+  chat.py             ← POST /api/chat (Python AgentRouter bridge)
   contact.ts          ← POST /api/contact
 
 backend/              ← Node/Express server (local / Docker) + shared lib for Vercel

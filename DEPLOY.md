@@ -20,7 +20,7 @@ Production site: **https://portfolio-black-six-34.vercel.app/** — frontend and
    | `CONTACT_FROM` | Optional | e.g. `Portfolio <onboarding@resend.dev>` |
    | `AGENTROUTER_USE_PYTHON_BRIDGE` | Optional | Leave unset on Vercel (defaults to fetch with Anthropic/Python-style headers) |
 
-3. **Deploy**: push to `main` (or run `npx vercel deploy --prod`). Builds run `npm run build`; serverless handlers live in `api/chat.ts` and `api/contact.ts`.
+3. **Deploy**: push to `main` (or run `npx vercel deploy --prod`). Builds run `npm run build`; serverless handlers are `api/chat.py` (Python + httpx/Anthropic bridge) and `api/contact.ts` (Node).
 
 ### AgentRouter / WAF
 
