@@ -28,13 +28,26 @@ function shouldPreferCycleTls(env: Env): boolean {
   return process.platform === 'linux'
 }
 
+function bufferToUtf8(body: unknown): string {
+  if (typeof body === 'string') return body
+  if (Buffer.isBuffer(body)) return body.toString('utf8')
+  if (body && typeof body === 'object') {
+    const maybe = body as { type?: string; data?: number[] }
+    if (maybe.type === 'Buffer' && Array.isArray(maybe.data)) {
+      return Buffer.from(maybe.data).toString('utf8')
+    }
+  }
+  return ''
+}
+
 function normalizeCycleTlsBody(resp: {
   status: number
-  body?: string
+  body?: unknown
   data?: unknown
 }): AgentRouterHttpResult {
-  if (typeof resp.body === 'string' && resp.body.trim()) {
-    return { status: resp.status, rawText: resp.body }
+  const fromBody = bufferToUtf8(resp.body)
+  if (fromBody.trim()) {
+    return { status: resp.status, rawText: fromBody }
   }
   if (resp.data !== undefined && resp.data !== null && typeof resp.data === 'object') {
     const keys = Object.keys(resp.data as object)
@@ -70,6 +83,9 @@ export async function agentRouterPost(
         headers,
         userAgent: headers['user-agent'],
         timeout: 120,
+        // Chrome-like TLS fingerprint — helps AgentRouter's Aliyun WAF on datacenter egress.
+        ja3: '771,4865-4866-4867-49195-49199-49196-49200-52393-52394-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-17513,29-23-24,0',
+        http2Fingerprint: '1:65536;4:131072;5:16384|12517377|3:0:0:201,5:0:0:101,7:0:0:1,9:0:7:1,11:0:3:1,13:0:0:241|m,p,a,s',
       },
       'post'
     )
