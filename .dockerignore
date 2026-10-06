@@ -32,7 +32,6 @@ npm-debug.log*
 # Docs & deploy configs not needed at build/runtime
 README.md
 DEPLOY.md
-render.yaml
 Dockerfile
 .dockerignore
 docker-compose.yml

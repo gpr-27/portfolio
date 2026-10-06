@@ -5,7 +5,7 @@ import { dirname, resolve } from 'path'
 
 const ROOT = dirname(fileURLToPath(import.meta.url))
 
-// Relative base on build → deploys to any path (Render static serve, GH Pages subpath).
+// Relative base on build → deploys to any static host path.
 // In dev, a tiny middleware serves POST /api/chat and /api/contact using
 // backend/lib/{chat-core,contact-core}.ts and the real keys from the root .env —
 // so `npm run dev` gives the genuine LLM assistant, not the offline fallback.

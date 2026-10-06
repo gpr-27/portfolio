@@ -1,37 +1,42 @@
 # Deployment Guide
 
-This portfolio supports direct deployment to **Vercel** (recommended, serverless functions) or **Render** (Node web service).
+Production site: **https://portfolio-black-six-34.vercel.app/** — frontend and `/api/*` run on **Vercel** (serverless functions).
 
 ---
 
-## Option 1: Deploy to Vercel (frontend + serverless API)
+## Deploy to Vercel
 
-**AgentRouter note:** `agentrouter.org` sits behind an Aliyun WAF that often **blocks datacenter egress** (including Vercel serverless). If `/api/chat` returns “Unable to generate a response”, use **Option 2 (Render)** for the API, or set `VITE_CHAT_ENDPOINT` on Vercel to your Render service URL and `CORS_ORIGINS` on Render to your Vercel site origin.
+1. **Import the repository** at [vercel.com/new](https://vercel.com/new). Vercel detects Vite from `vercel.json` (`outputDirectory: "dist"`).
 
-1. **Import the repository into Vercel**:
-   - Go to [vercel.com/new](https://vercel.com/new) and select your GitHub repository.
-   - Vercel automatically detects Vite from `vercel.json` (`outputDirectory: "dist"`).
+2. **Environment variables** (**Project Settings → Environment Variables**), for Production (and Preview if you use previews):
 
-2. **Configure Environment Variables** in the Vercel Dashboard (**Project Settings → Environment Variables**):
-   - `AGENTROUTER_API_KEY`: Your AgentRouter secret API key.
-   - `MONGODB_URI`: (Optional) MongoDB connection string for chat logs and contact messages.
-   - `MONGODB_DB`: (Optional) `portfolio`
-   - `RESEND_API_KEY`: (Optional) Resend API key for contact form emails.
-   - `CONTACT_TO`: `praneethg1830@gmail.com`
-   - `CONTACT_FROM`: `Portfolio <onboarding@resend.dev>`
+   | Variable | Required | Notes |
+   |----------|----------|--------|
+   | `AGENTROUTER_API_KEY` | Yes | AgentRouter secret API key |
+   | `MONGODB_URI` | Optional | Chat logs + contact messages |
+   | `MONGODB_DB` | Optional | Default `portfolio` |
+   | `RESEND_API_KEY` | Optional | Contact form email |
+   | `CONTACT_TO` | Optional | e.g. `praneethg1830@gmail.com` |
+   | `CONTACT_FROM` | Optional | e.g. `Portfolio <onboarding@resend.dev>` |
+   | `AGENTROUTER_USE_PYTHON_BRIDGE` | Optional | Leave unset on Vercel (defaults to fetch with Anthropic/Python-style headers) |
 
-3. **Deploy**:
-   - Click **Deploy**. Vercel will build the frontend and deploy the serverless functions in `/api/chat` and `/api/contact`.
+3. **Deploy**: push to `main` (or run `npx vercel deploy --prod`). Builds run `npm run build`; serverless handlers live in `api/chat.ts` and `api/contact.ts`.
+
+### AgentRouter / WAF
+
+`agentrouter.org` uses an Aliyun WAF that sometimes blocks datacenter egress. On Vercel, the API uses **Node `fetch`** with the same client headers as the local Python bridge (`Anthropic/Python 1.0.0`, stainless metadata). If chat still returns “Unable to generate a response”, retry later or check the key and AgentRouter status — there is no separate proxy backend.
+
+### MongoDB Atlas
+
+If you use `MONGODB_URI`, allow **Vercel** egress in Atlas (**Network Access**). Serverless IPs change; `0.0.0.0/0` is the usual choice for a portfolio.
 
 ---
 
-## Option 2: Deploy to Render (recommended for AgentRouter / AI chat)
+## Local production-style server (optional)
 
-Single Node service serves `dist/` and `POST /api/chat` + `POST /api/contact`. Binds `0.0.0.0:$PORT` for Render.
+```bash
+npm run build
+npm start   # Express on PORT (default 3000), serves dist/ + /api
+```
 
-1. [Render Dashboard](https://dashboard.render.com) → **New → Blueprint**.
-2. Connect the GitHub repository (uses `render.yaml` — **Docker** image with Node + Python for the AgentRouter bridge).
-3. Add secret environment variables (`AGENTROUTER_API_KEY`, optional alias `AXON_API_KEY`, `MONGODB_URI`, `RESEND_API_KEY`).
-4. Set `CORS_ORIGINS` to your Vercel site (e.g. `https://portfolio-black-six-34.vercel.app`) if the frontend is on Vercel.
-5. Click **Apply**. After switching from native Node to Docker, trigger a **Manual Deploy** once if chat still fails.
-
+Docker (`docker compose up --build`) uses the same Express stack with the Python AgentRouter bridge installed in the image for Linux hosts where WAF is strict.

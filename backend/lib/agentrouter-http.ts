@@ -1,4 +1,3 @@
-import initCycleTLS from 'cycletls'
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -29,10 +28,12 @@ export type PythonBridgeResult = {
   }
 }
 
-let cycleTls: Awaited<ReturnType<typeof initCycleTLS>> | null = null
+let cycleTls: { (url: string, options: object, method: string): Promise<unknown> } | null =
+  null
 
 async function getCycleTLS() {
   if (!cycleTls) {
+    const { default: initCycleTLS } = await import('cycletls')
     cycleTls = await initCycleTLS()
   }
   return cycleTls
@@ -43,9 +44,15 @@ export function isWafHtmlBody(rawText: string): boolean {
   return sample.includes('<!doctype html') || sample.includes('aliyun_waf')
 }
 
+export function isVercelServerless(): boolean {
+  return process.env.VERCEL === '1' || process.env.VERCEL === 'true'
+}
+
 export function shouldPreferPythonBridge(env: Env): boolean {
   if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'false') return false
   if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return true
+  // Vercel Linux functions have no Python bridge; use httpx-style fetch headers instead.
+  if (isVercelServerless()) return false
   return process.platform === 'linux'
 }
 
@@ -53,6 +60,8 @@ function shouldPreferCycleTls(env: Env): boolean {
   if (env.AGENTROUTER_USE_CYCLETLS === 'false') return false
   if (env.AGENTROUTER_USE_CYCLETLS === 'true') return true
   if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return false
+  // CycleTLS native binaries are unreliable on Vercel serverless.
+  if (isVercelServerless()) return false
   return process.platform === 'linux'
 }
 
