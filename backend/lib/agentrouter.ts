@@ -204,7 +204,9 @@ async function callOpenAICompatible(
   }
 
   if (!text.trim()) {
-    throw new Error(`AgentRouter returned an empty completion for model ${modelId}.`)
+    throw new Error(
+      `AgentRouter returned an empty completion for model ${modelId}: ${rawText.slice(0, 400)}`
+    )
   }
 
   const usage: UnifiedUsage = {
