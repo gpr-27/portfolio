@@ -1,4 +1,7 @@
 import initCycleTLS from 'cycletls'
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 type Env = Record<string, string | undefined>
 
@@ -23,9 +26,76 @@ export function isWafHtmlBody(rawText: string): boolean {
 
 function shouldPreferCycleTls(env: Env): boolean {
   if (env.AGENTROUTER_USE_CYCLETLS === 'false') return false
+  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return false
   if (env.AGENTROUTER_USE_CYCLETLS === 'true') return true
   // Render/Docker/Linux servers hit Aliyun WAF on native Node fetch; residential dev usually does not.
   return process.platform === 'linux'
+}
+
+function shouldPreferPythonBridge(env: Env): boolean {
+  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'false') return false
+  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return true
+  return process.platform === 'linux'
+}
+
+const PYTHON_SCRIPT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../scripts/agentrouter_request.py'
+)
+
+async function viaPythonBridge(
+  payload: Record<string, unknown>,
+  env: Env
+): Promise<AgentRouterHttpResult> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('python3', [PYTHON_SCRIPT], {
+      env: { ...process.env, ...env } as NodeJS.ProcessEnv,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (chunk) => {
+      stdout += String(chunk)
+    })
+    child.stderr.on('data', (chunk) => {
+      stderr += String(chunk)
+    })
+    child.on('error', (err) => reject(err))
+    child.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(stderr || `Python AgentRouter bridge exited with code ${code}`))
+        return
+      }
+      try {
+        const parsed = JSON.parse(stdout.trim())
+        if (!parsed.ok) {
+          reject(new Error(parsed.error || 'Python AgentRouter bridge failed'))
+          return
+        }
+        resolve({
+          status: 200,
+          rawText: JSON.stringify({
+            content: [
+              ...(parsed.reasoning
+                ? [{ type: 'thinking', thinking: parsed.reasoning }]
+                : []),
+              { type: 'text', text: parsed.text || '' },
+            ],
+            usage: {
+              input_tokens: parsed.usage?.inputTokens,
+              output_tokens: parsed.usage?.outputTokens,
+            },
+          }),
+        })
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    child.stdin.write(JSON.stringify(payload))
+    child.stdin.end()
+  })
 }
 
 function bufferToUtf8(body: unknown): string {
@@ -45,18 +115,17 @@ function normalizeCycleTlsBody(resp: {
   body?: unknown
   data?: unknown
 }): AgentRouterHttpResult {
-  const fromBody = bufferToUtf8(resp.body)
-  if (fromBody.trim()) {
-    return { status: resp.status, rawText: fromBody }
+  for (const candidate of [resp.data, resp.body]) {
+    const text = bufferToUtf8(candidate)
+    if (text.trim()) {
+      return { status: resp.status, rawText: text }
+    }
   }
   if (resp.data !== undefined && resp.data !== null && typeof resp.data === 'object') {
     const keys = Object.keys(resp.data as object)
     if (keys.length > 0) {
       return { status: resp.status, rawText: JSON.stringify(resp.data) }
     }
-  }
-  if (resp.data !== undefined && resp.data !== null) {
-    return { status: resp.status, rawText: String(resp.data) }
   }
   return { status: resp.status, rawText: '' }
 }
@@ -67,6 +136,21 @@ export async function agentRouterPost(
   payload: unknown,
   env: Env
 ): Promise<AgentRouterHttpResult> {
+  const record = payload as Record<string, unknown>
+
+  if (shouldPreferPythonBridge(env) && url.includes('/v1/messages')) {
+    return viaPythonBridge(
+      {
+        model: record.model,
+        messages: record.messages,
+        system: record.system,
+        max_tokens: record.max_tokens,
+        temperature: record.temperature,
+      },
+      env
+    )
+  }
+
   const body = JSON.stringify(payload)
 
   const viaFetch = async (): Promise<AgentRouterHttpResult> => {
