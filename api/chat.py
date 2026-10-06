@@ -106,8 +106,12 @@ def _handle_chat(body: dict[str, Any]) -> dict[str, Any]:
             reply = result["text"]
             usage = result.get("usage")
             reasoning = result.get("reasoning")
-    except Exception:
-        pass
+        elif not result.get("ok"):
+            print(f"agentrouter error: {result.get('error', result)}"[:500], file=sys.stderr)
+        else:
+            print("agentrouter empty completion", file=sys.stderr)
+    except Exception as exc:
+        print(f"agentrouter exception: {exc}", file=sys.stderr)
 
     question = ""
     for m in reversed(trimmed):
