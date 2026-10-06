@@ -2,12 +2,31 @@ import initCycleTLS from 'cycletls'
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-
 type Env = Record<string, string | undefined>
 
 export type AgentRouterHttpResult = {
   status: number
   rawText: string
+}
+
+export type PythonBridgePayload = {
+  protocol: 'openai-compatible' | 'anthropic'
+  model: string
+  messages: { role: string; content: string }[]
+  system?: string
+  max_tokens?: number
+  temperature?: number
+}
+
+export type PythonBridgeResult = {
+  model: string
+  text: string
+  reasoning?: string
+  usage?: {
+    inputTokens?: number
+    outputTokens?: number
+    totalTokens?: number
+  }
 }
 
 let cycleTls: Awaited<ReturnType<typeof initCycleTLS>> | null = null
@@ -24,17 +43,16 @@ export function isWafHtmlBody(rawText: string): boolean {
   return sample.includes('<!doctype html') || sample.includes('aliyun_waf')
 }
 
+export function shouldPreferPythonBridge(env: Env): boolean {
+  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'false') return false
+  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return true
+  return process.platform === 'linux'
+}
+
 function shouldPreferCycleTls(env: Env): boolean {
   if (env.AGENTROUTER_USE_CYCLETLS === 'false') return false
   if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return false
   if (env.AGENTROUTER_USE_CYCLETLS === 'true') return true
-  // Render/Docker/Linux servers hit Aliyun WAF on native Node fetch; residential dev usually does not.
-  return process.platform === 'linux'
-}
-
-function shouldPreferPythonBridge(env: Env): boolean {
-  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'false') return false
-  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return true
   return process.platform === 'linux'
 }
 
@@ -43,22 +61,23 @@ const PYTHON_SCRIPT = path.resolve(
   '../scripts/agentrouter_request.py'
 )
 
-async function viaPythonBridge(
-  payload: Record<string, unknown>,
+const PYDEPS_DIR = path.join(path.dirname(PYTHON_SCRIPT), 'pydeps')
+
+function pythonEnv(env: Env): NodeJS.ProcessEnv {
+  return {
+    ...process.env,
+    ...env,
+    PYTHONPATH: [PYDEPS_DIR, process.env.PYTHONPATH].filter(Boolean).join(path.delimiter),
+  } as NodeJS.ProcessEnv
+}
+
+export async function agentRouterViaPythonBridge(
+  payload: PythonBridgePayload,
   env: Env
-): Promise<AgentRouterHttpResult> {
+): Promise<PythonBridgeResult> {
   return new Promise((resolve, reject) => {
     const child = spawn('python3', [PYTHON_SCRIPT], {
-      env: {
-        ...process.env,
-        ...env,
-        PYTHONPATH: [
-          path.join(path.dirname(PYTHON_SCRIPT), 'pydeps'),
-          process.env.PYTHONPATH,
-        ]
-          .filter(Boolean)
-          .join(path.delimiter),
-      } as NodeJS.ProcessEnv,
+      env: pythonEnv(env),
       stdio: ['pipe', 'pipe', 'pipe'],
     })
 
@@ -83,19 +102,10 @@ async function viaPythonBridge(
           return
         }
         resolve({
-          status: 200,
-          rawText: JSON.stringify({
-            content: [
-              ...(parsed.reasoning
-                ? [{ type: 'thinking', thinking: parsed.reasoning }]
-                : []),
-              { type: 'text', text: parsed.text || '' },
-            ],
-            usage: {
-              input_tokens: parsed.usage?.inputTokens,
-              output_tokens: parsed.usage?.outputTokens,
-            },
-          }),
+          model: parsed.model,
+          text: parsed.text || '',
+          reasoning: parsed.reasoning || undefined,
+          usage: parsed.usage,
         })
       } catch (err) {
         reject(err)
@@ -145,21 +155,6 @@ export async function agentRouterPost(
   payload: unknown,
   env: Env
 ): Promise<AgentRouterHttpResult> {
-  const record = payload as Record<string, unknown>
-
-  if (shouldPreferPythonBridge(env) && url.includes('/v1/messages')) {
-    return viaPythonBridge(
-      {
-        model: record.model,
-        messages: record.messages,
-        system: record.system,
-        max_tokens: record.max_tokens,
-        temperature: record.temperature,
-      },
-      env
-    )
-  }
-
   const body = JSON.stringify(payload)
 
   const viaFetch = async (): Promise<AgentRouterHttpResult> => {
@@ -176,7 +171,6 @@ export async function agentRouterPost(
         headers,
         userAgent: headers['user-agent'],
         timeout: 120,
-        // Chrome-like TLS fingerprint — helps AgentRouter's Aliyun WAF on datacenter egress.
         ja3: '771,4865-4866-4867-49195-49199-49196-49200-52393-52394-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-17513,29-23-24,0',
         http2Fingerprint: '1:65536;4:131072;5:16384|12517377|3:0:0:201,5:0:0:101,7:0:0:1,9:0:7:1,11:0:3:1,13:0:0:241|m,p,a,s',
       },

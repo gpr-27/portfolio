@@ -1,7 +1,12 @@
 // Centralized AgentRouter multi-model provider service
 // Supports OpenAI-compatible and Anthropic-compatible protocols with normalized routing.
 
-import { agentRouterPost, isWafHtmlBody } from './agentrouter-http.js'
+import {
+  agentRouterPost,
+  agentRouterViaPythonBridge,
+  isWafHtmlBody,
+  shouldPreferPythonBridge,
+} from './agentrouter-http.js'
 
 export type ModelProtocol = 'openai-compatible' | 'anthropic'
 
@@ -30,6 +35,16 @@ export const AVAILABLE_MODELS: Record<string, ModelMetadata> = {
   'gpt-5.6-sol': {
     id: 'gpt-5.6-sol',
     name: 'GPT-5.6 Sol',
+    provider: 'agentrouter',
+    protocol: 'openai-compatible',
+    pricing: {
+      input: '$3 / 1M',
+      output: '$15 / 1M',
+    },
+  },
+  'gpt-6-astra': {
+    id: 'gpt-6-astra',
+    name: 'GPT-6 Astra',
     provider: 'agentrouter',
     protocol: 'openai-compatible',
     pricing: {
@@ -98,27 +113,30 @@ function getBaseUrl(env: Env): string {
   return (env.AGENTROUTER_BASE_URL || 'https://agentrouter.org').replace(/\/$/, '')
 }
 
-/** Claude Code wire image — required for AgentRouter's upstream WAF allowlist. */
-const CLAUDE_CODE_ANTHROPIC_BETA =
-  'claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24,redact-thinking-2026-02-12'
-
-function buildAgentRouterHeaders(apiKey: string): Record<string, string> {
+function buildOpenAICompatibleHeaders(apiKey: string): Record<string, string> {
   return {
     'content-type': 'application/json',
-    accept: 'application/json',
-    'user-agent': 'claude-cli/2.1.195 (external, cli)',
-    'x-app': 'cli',
-    'anthropic-version': '2023-06-01',
-    'anthropic-beta': CLAUDE_CODE_ANTHROPIC_BETA,
-    'anthropic-dangerous-direct-browser-access': 'true',
-    Authorization: `Bearer ${apiKey}`,
-    'x-api-key': apiKey,
+    authorization: `Bearer ${apiKey}`,
+    'user-agent': 'Anthropic/Python 1.0.0',
     'x-stainless-lang': 'python',
-    'x-stainless-package-version': '0.34.0',
     'x-stainless-os': 'MacOS',
     'x-stainless-arch': 'arm64',
     'x-stainless-runtime': 'CPython',
-    'x-stainless-runtime-version': '3.11.0',
+  }
+}
+
+function buildAnthropicHeaders(apiKey: string): Record<string, string> {
+  return {
+    'content-type': 'application/json',
+    accept: 'application/json',
+    'anthropic-version': '2023-06-01',
+    'x-api-key': apiKey,
+    authorization: `Bearer ${apiKey}`,
+    'user-agent': 'Anthropic/Python 1.0.0',
+    'x-stainless-lang': 'python',
+    'x-stainless-os': 'MacOS',
+    'x-stainless-arch': 'arm64',
+    'x-stainless-runtime': 'CPython',
   }
 }
 
@@ -136,7 +154,7 @@ function parseAgentRouterJson(rawText: string, status: number): any {
 }
 
 function getApiKey(env: Env): string {
-  const key = env.AGENTROUTER_API_KEY || ''
+  const key = env.AGENTROUTER_API_KEY || env.AXON_API_KEY || ''
   if (!key) {
     throw new Error('AGENTROUTER_API_KEY is not configured on the server.')
   }
@@ -163,7 +181,7 @@ async function callOpenAICompatible(
     payloadMessages.push({ role: m.role, content: m.content })
   }
 
-  const headers = buildAgentRouterHeaders(apiKey)
+  const headers = buildOpenAICompatibleHeaders(apiKey)
   const requestBody = {
     model: modelId,
     messages: payloadMessages,
@@ -254,9 +272,9 @@ async function callAnthropicCompatible(
     payload.system = system
   }
 
-  const headers = buildAgentRouterHeaders(apiKey)
+  const headers = buildAnthropicHeaders(apiKey)
   const { status, rawText } = await agentRouterPost(
-    `${baseUrl}/v1/messages?beta=true`,
+    `${baseUrl}/v1/messages`,
     headers,
     payload,
     env
@@ -324,11 +342,19 @@ async function callAnthropicCompatible(
  * Unified provider chat interface.
  * Central entry point for all model chat completions.
  */
+function buildPythonBridgeMessages(
+  messages: ChatMessage[]
+): { role: string; content: string }[] {
+  return messages
+    .filter((m) => m.role === 'user' || m.role === 'assistant')
+    .map((m) => ({ role: m.role, content: m.content }))
+}
+
 export async function chat(
   options: UnifiedChatOptions,
   env: Env
 ): Promise<UnifiedChatResponse> {
-  const apiKey = getApiKey(env)
+  getApiKey(env)
   const baseUrl = getBaseUrl(env)
   const targetModelId = options.model || DEFAULT_MODEL_ID
   const modelConfig = AVAILABLE_MODELS[targetModelId] || AVAILABLE_MODELS[DEFAULT_MODEL_ID]
@@ -337,17 +363,31 @@ export async function chat(
     throw new Error(`Invalid model requested: ${targetModelId}`)
   }
 
-  // Prefer Claude Code /messages wire — passes AgentRouter WAF; OpenAI-shaped /chat/completions is fallback.
-  try {
-    return await callAnthropicCompatible(baseUrl, modelConfig.id, apiKey, options, env)
-  } catch (messagesErr) {
-    const msg = (messagesErr as Error).message || ''
-    const canFallback =
-      modelConfig.protocol === 'openai-compatible' &&
-      (msg.includes('503') || msg.includes('无可用渠道') || msg.includes('no available channel'))
-    if (!canFallback) {
-      throw messagesErr
+  const { messages, system, temperature = 0.7, maxTokens = 4096 } = options
+
+  if (shouldPreferPythonBridge(env)) {
+    const bridged = await agentRouterViaPythonBridge(
+      {
+        protocol: modelConfig.protocol,
+        model: modelConfig.id,
+        messages: buildPythonBridgeMessages(messages),
+        system,
+        max_tokens: maxTokens,
+        temperature,
+      },
+      env
+    )
+    return {
+      model: bridged.model,
+      text: bridged.text,
+      reasoning: bridged.reasoning,
+      usage: bridged.usage,
     }
-    return callOpenAICompatible(baseUrl, modelConfig.id, apiKey, options, env)
   }
+
+  const apiKey = getApiKey(env)
+  if (modelConfig.protocol === 'anthropic') {
+    return callAnthropicCompatible(baseUrl, modelConfig.id, apiKey, options, env)
+  }
+  return callOpenAICompatible(baseUrl, modelConfig.id, apiKey, options, env)
 }
