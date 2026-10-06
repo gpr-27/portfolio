@@ -30,22 +30,19 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 python3-pip \
-  && pip3 install --no-cache-dir -r backend/scripts/requirements.txt \
-  && rm -rf /var/lib/apt/lists/*
-
 # Prod-only deps: express, mongodb, tsx, dotenv, cycletls. No dev tooling in the runtime image.
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy only what runtime needs from the builder, preserving the /app layout:
-#  - dist/    : built static frontend served by Express
-#  - backend/ : the .ts source tsx executes (server + lib/*)
-#  - tsconfig*: project config referenced by the toolchain (harmless, kept for parity)
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/backend ./backend
 COPY --from=builder /app/tsconfig.json /app/tsconfig.app.json /app/tsconfig.node.json ./
+
+USER root
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 python3-pip \
+  && pip3 install --no-cache-dir -r backend/scripts/requirements.txt \
+  && rm -rf /var/lib/apt/lists/*
 
 # Drop root: run as the unprivileged `node` user that ships with the base image.
 USER node
