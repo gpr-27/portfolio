@@ -176,8 +176,20 @@ export async function agentRouterPost(
   const body = JSON.stringify(payload)
 
   const viaFetch = async (): Promise<AgentRouterHttpResult> => {
-    const response = await fetch(url, { method: 'POST', headers, body })
-    return { status: response.status, rawText: await response.text() }
+    const controller = new AbortController()
+    const timeoutMs = 55_000
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body,
+        signal: controller.signal,
+      })
+      return { status: response.status, rawText: await response.text() }
+    } finally {
+      clearTimeout(timer)
+    }
   }
 
   const viaCycleTls = async (): Promise<AgentRouterHttpResult> => {
