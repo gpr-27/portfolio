@@ -8,7 +8,6 @@ import sys
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
 from typing import Any
-from urllib.parse import parse_qs
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPTS = os.path.join(ROOT, "backend", "scripts")
