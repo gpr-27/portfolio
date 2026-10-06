@@ -22,6 +22,8 @@ services:
         value: "20"
       - key: MONGODB_DB
         value: portfolio
+      - key: AGENTROUTER_USE_CYCLETLS
+        value: "true"
       - key: CONTACT_TO
         value: praneethg1830@gmail.com
       - key: CONTACT_FROM

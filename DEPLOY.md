@@ -4,7 +4,9 @@ This portfolio supports direct deployment to **Vercel** (recommended, serverless
 
 ---
 
-## Option 1: Deploy to Vercel (Recommended)
+## Option 1: Deploy to Vercel (frontend + serverless API)
+
+**AgentRouter note:** `agentrouter.org` sits behind an Aliyun WAF that often **blocks datacenter egress** (including Vercel serverless). If `/api/chat` returns “Unable to generate a response”, use **Option 2 (Render)** for the API, or set `VITE_CHAT_ENDPOINT` on Vercel to your Render service URL and `CORS_ORIGINS` on Render to your Vercel site origin.
 
 1. **Import the repository into Vercel**:
    - Go to [vercel.com/new](https://vercel.com/new) and select your GitHub repository.
@@ -23,7 +25,9 @@ This portfolio supports direct deployment to **Vercel** (recommended, serverless
 
 ---
 
-## Option 2: Deploy to Render
+## Option 2: Deploy to Render (recommended for AgentRouter / AI chat)
+
+Single Node service serves `dist/` and `POST /api/chat` + `POST /api/contact`. Binds `0.0.0.0:$PORT` for Render.
 
 1. [Render Dashboard](https://dashboard.render.com) → **New → Blueprint**.
 2. Connect the GitHub repository (uses `render.yaml`).

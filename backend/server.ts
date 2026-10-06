@@ -8,6 +8,27 @@ import { handleContact } from './lib/contact-core.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+
+const corsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (corsOrigins.length === 0 || corsOrigins.includes(origin))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type');
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+  next();
+});
+
 app.use(express.json({ limit: '1mb' }));
 
 app.post('/api/chat', async (req, res) => {
@@ -33,4 +54,5 @@ app.use(express.static(dist));
 app.get('*', (_req, res) => res.sendFile(path.join(dist, 'index.html')));
 
 const port = Number(process.env.PORT) || 3000;
-app.listen(port, () => console.log('Server on ' + port));
+const host = process.env.HOST || '0.0.0.0';
+app.listen(port, host, () => console.log(`Server on ${host}:${port}`));
