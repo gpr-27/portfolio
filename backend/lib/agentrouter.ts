@@ -26,7 +26,8 @@ export const AVAILABLE_MODELS: Record<string, ModelMetadata> = {
     id: 'deepseek-v4-flash',
     name: 'DeepSeek V4 Flash',
     provider: 'agentrouter',
-    protocol: 'openai-compatible',
+    // AgentRouter exposes DeepSeek via Anthropic Messages (WAF-friendly vs /v1/chat/completions).
+    protocol: 'anthropic',
     pricing: {
       input: '$2 / 1M',
       output: '$6 / 1M',
