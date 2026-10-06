@@ -51,8 +51,8 @@ export function shouldPreferPythonBridge(env: Env): boolean {
 
 function shouldPreferCycleTls(env: Env): boolean {
   if (env.AGENTROUTER_USE_CYCLETLS === 'false') return false
-  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return false
   if (env.AGENTROUTER_USE_CYCLETLS === 'true') return true
+  if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') return false
   return process.platform === 'linux'
 }
 

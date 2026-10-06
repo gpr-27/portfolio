@@ -30,3 +30,5 @@ services:
         value: praneethg1830@gmail.com
       - key: CONTACT_FROM
         value: "Portfolio <onboarding@resend.dev>"
+      - key: CORS_ORIGINS
+        value: "https://portfolio-black-six-34.vercel.app"
