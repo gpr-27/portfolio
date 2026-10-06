@@ -297,7 +297,9 @@ async function callAnthropicCompatible(
   }
 
   if (!text.trim()) {
-    throw new Error(`AgentRouter returned an empty completion for model ${modelId}.`)
+    throw new Error(
+      `AgentRouter returned an empty completion for model ${modelId}: ${rawText.slice(0, 400)}`
+    )
   }
 
   const inputTokens = data?.usage?.input_tokens
