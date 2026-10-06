@@ -9,9 +9,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "render:setup-python": "rm -rf backend/scripts/pydeps && PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install -r backend/scripts/requirements.txt -t backend/scripts/pydeps",
-    "postinstall": "npm run render:setup-python",
-    "build": "npm run render:setup-python && tsc -b && vite build",
+    "setup-python-bridge": "rm -rf backend/scripts/pydeps && PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install -r backend/scripts/requirements.txt -t backend/scripts/pydeps",
+    "postinstall": "node -e \"if (!process.env.VERCEL) require('child_process').spawnSync('npm',['run','setup-python-bridge'],{stdio:'inherit',shell:true})\"",
+    "build": "tsc -b && vite build",
     "start": "tsx backend/server.ts",
     "preview": "vite preview"
   },

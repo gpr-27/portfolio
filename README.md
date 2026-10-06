@@ -7,7 +7,7 @@ contact form.
 
 - **Frontend:** React 19 + Vite + TypeScript, Framer Motion, Lenis smooth scroll
 - **Backend:** Express & Vercel serverless (AgentRouter + MongoDB Atlas + Resend)
-- **Deploy:** Vercel (recommended serverless) or Render (single web service)
+- **Deploy:** Vercel (frontend + serverless `/api/*`)
 - **Type:** Cormorant Garamond (display) · Inter (body) · JetBrains Mono (code)
 - **Palette:** cream `#faf9f5` · coral `#cc785c` · navy `#181715`
 
@@ -25,7 +25,7 @@ api/                  ← Vercel serverless functions
   chat.ts             ← POST /api/chat
   contact.ts          ← POST /api/contact
 
-backend/              ← Node/Express server (local & Render)
+backend/              ← Node/Express server (local / Docker) + shared lib for Vercel
   server.ts           ← Express: serves dist/ + POST /api/chat + POST /api/contact
   lib/
     agentrouter.ts    ← AgentRouter multi-model provider (DeepSeek, GPT, Claude)
@@ -61,8 +61,8 @@ npm run build    # builds the frontend into dist/
 npm start        # starts the Express server (serves dist/ + /api on one origin)
 ```
 
-This is exactly what Render runs. The Express server reads `PORT` from the
-environment (defaults to `3000` locally).
+The Express server reads `PORT` from the environment (defaults to `3000` locally).
+Use this for Docker or a single-origin local prod check; **production** uses Vercel serverless `api/*` instead.
 
 ## Editing content
 
@@ -98,5 +98,4 @@ are still saved to the database.
 
 ## Deploy
 
-Supports direct deployment on **Vercel** (serverless) or **Render** (Express). See **[DEPLOY.md](./DEPLOY.md)**
-for the full step-by-step (GitHub push, Vercel/Render setup, env vars, and MongoDB Atlas network access).
+Deploy on **Vercel** (serverless). See **[DEPLOY.md](./DEPLOY.md)** for env vars, MongoDB Atlas network access, and deploy steps.

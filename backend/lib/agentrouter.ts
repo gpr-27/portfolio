@@ -146,7 +146,7 @@ function parseAgentRouterJson(rawText: string, status: number): any {
   } catch {
     if (isWafHtmlBody(rawText)) {
       throw new Error(
-        'AgentRouter blocked this server (Aliyun WAF). Use the Render API backend with CycleTLS enabled.'
+        'AgentRouter blocked this server (Aliyun WAF). Try again later or contact support if it persists.'
       )
     }
     throw new Error(`AgentRouter returned non-JSON response (${status}): ${rawText.slice(0, 200)}`)
@@ -389,7 +389,8 @@ export async function chat(
         'Python AgentRouter bridge failed:',
         (bridgeErr as Error)?.message || bridgeErr
       )
-      if (shouldPreferPythonBridge(env)) {
+      // Fall through to HTTP fetch (Anthropic/Python client headers) unless bridge-only mode.
+      if (env.AGENTROUTER_USE_PYTHON_BRIDGE === 'true') {
         throw bridgeErr
       }
     }

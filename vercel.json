@@ -1,14 +1,6 @@
 {
   "framework": "vite",
-  "regions": ["sin1"],
-  "rewrites": [
-    {
-      "source": "/api/chat",
-      "destination": "https://praneeth-portfolio-4j9i.onrender.com/api/chat"
-    },
-    {
-      "source": "/api/contact",
-      "destination": "https://praneeth-portfolio-4j9i.onrender.com/api/contact"
-    }
-  ]
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "regions": ["sin1"]
 }
