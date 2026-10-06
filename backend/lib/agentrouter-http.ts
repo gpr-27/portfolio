@@ -33,11 +33,17 @@ function normalizeCycleTlsBody(resp: {
   body?: string
   data?: unknown
 }): AgentRouterHttpResult {
-  if (resp.data !== undefined && resp.data !== null && typeof resp.data === 'object') {
-    return { status: resp.status, rawText: JSON.stringify(resp.data) }
-  }
-  if (typeof resp.body === 'string') {
+  if (typeof resp.body === 'string' && resp.body.trim()) {
     return { status: resp.status, rawText: resp.body }
+  }
+  if (resp.data !== undefined && resp.data !== null && typeof resp.data === 'object') {
+    const keys = Object.keys(resp.data as object)
+    if (keys.length > 0) {
+      return { status: resp.status, rawText: JSON.stringify(resp.data) }
+    }
+  }
+  if (resp.data !== undefined && resp.data !== null) {
+    return { status: resp.status, rawText: String(resp.data) }
   }
   return { status: resp.status, rawText: '' }
 }
