@@ -24,7 +24,13 @@ Production site: **https://portfolio-black-six-34.vercel.app/** — frontend and
 
 ### AgentRouter / WAF
 
-`agentrouter.org` uses an Aliyun WAF that sometimes blocks datacenter egress. On Vercel, the API uses **Node `fetch`** with the same client headers as the local Python bridge (`Anthropic/Python 1.0.0`, stainless metadata). If chat still returns “Unable to generate a response”, retry later or check the key and AgentRouter status — there is no separate proxy backend.
+`agentrouter.org` sits behind an **Aliyun WAF** that often blocks **datacenter egress** (including Vercel serverless in `sin1`). Production `/api/chat` uses the Python bridge (`httpx` / Anthropic SDK with Axon-style headers). If Vercel logs show `AgentRouter blocked request (Aliyun WAF)`, the API key is fine but the host IP is blocked.
+
+Mitigations (pick one):
+
+- Ask AgentRouter to **allowlist** your Vercel deployment egress (or use a provider that offers static outbound IPs).
+- Set **`AGENTROUTER_HTTPS_PROXY`** on Vercel to an HTTPS proxy with residential/non-datacenter egress (secret env var only — never commit).
+- Run chat locally via `npm run dev` (residential IP) while the portfolio UI stays on Vercel.
 
 ### MongoDB Atlas
 

@@ -13,7 +13,17 @@ def get_api_key() -> str:
     ).strip()
 
 
+def get_https_proxy() -> str | None:
+    proxy = (
+        os.environ.get("AGENTROUTER_HTTPS_PROXY", "")
+        or os.environ.get("HTTPS_PROXY", "")
+        or os.environ.get("HTTP_PROXY", "")
+    ).strip()
+    return proxy or None
+
+
 def call_anthropic(payload: dict, api_key: str, base_url: str) -> dict:
+    import httpx
     from anthropic import Anthropic
 
     model = payload["model"]
@@ -22,7 +32,9 @@ def call_anthropic(payload: dict, api_key: str, base_url: str) -> dict:
     max_tokens = int(payload.get("max_tokens") or 1024)
     temperature = payload.get("temperature")
 
-    client = Anthropic(auth_token=api_key, base_url=base_url)
+    proxy = get_https_proxy()
+    http_client = httpx.Client(proxy=proxy, timeout=120.0) if proxy else None
+    client = Anthropic(auth_token=api_key, base_url=base_url, http_client=http_client)
 
     kwargs: dict = {
         "model": model,
@@ -89,18 +101,19 @@ def call_openai_compatible(payload: dict, api_key: str, base_url: str) -> dict:
         "x-stainless-runtime": "CPython",
     }
 
-    response = httpx.post(
-        f"{base_url}/v1/chat/completions",
-        headers=headers,
-        json={
-            "model": model,
-            "messages": payload_messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "stream": False,
-        },
-        timeout=120.0,
-    )
+    proxy = get_https_proxy()
+    with httpx.Client(proxy=proxy, timeout=120.0) as client:
+        response = client.post(
+            f"{base_url}/v1/chat/completions",
+            headers=headers,
+            json={
+                "model": model,
+                "messages": payload_messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "stream": False,
+            },
+        )
 
     raw = response.text
     if response.status_code < 200 or response.status_code >= 300:
