@@ -8,6 +8,8 @@ node_modules
 dist
 dist-ssr
 backend/scripts/pydeps
+__pycache__/
+*.py[cod]
 *.local
 
 # Secrets / env — one root .env for the whole project (commit only the template)

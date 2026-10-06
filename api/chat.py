@@ -19,6 +19,8 @@ from agentrouter_request import call_anthropic, call_openai_compatible, get_api_
 DEFAULT_MODEL = "deepseek-v4-flash"
 OPENAI_MODELS = frozenset({"deepseek-v4-flash", "gpt-5.6-sol", "gpt-6-astra"})
 ANTHROPIC_MODELS = frozenset({"claude-opus-5", "claude-opus-4-8"})
+# AgentRouter serves DeepSeek via Anthropic Messages; datacenter WAF often blocks /v1/chat/completions only.
+ANTHROPIC_ROUTE_MODELS = ANTHROPIC_MODELS | frozenset({"deepseek-v4-flash"})
 
 RULES = """You are the assistant on Praneeth Reddy Gandra's portfolio website.
 Speak in the first person as Praneeth — warm, natural, and concise.
@@ -95,7 +97,7 @@ def _handle_chat(body: dict[str, Any]) -> dict[str, Any]:
     reasoning: str | None = None
 
     try:
-        if model in ANTHROPIC_MODELS:
+        if model in ANTHROPIC_ROUTE_MODELS:
             payload["protocol"] = "anthropic"
             result = call_anthropic(payload, api_key, base_url)
         else:
