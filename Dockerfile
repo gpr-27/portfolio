@@ -45,7 +45,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 USER root
 RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 python3-pip \
-  && python3 -m pip install --no-cache-dir -r backend/scripts/requirements.txt -t backend/scripts/pydeps \
+  && PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install --no-cache-dir -r backend/scripts/requirements.txt -t backend/scripts/pydeps \
   && rm -rf /var/lib/apt/lists/*
 
 # Drop root: run as the unprivileged `node` user that ships with the base image.
