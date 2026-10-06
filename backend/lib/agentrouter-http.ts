@@ -49,7 +49,16 @@ async function viaPythonBridge(
 ): Promise<AgentRouterHttpResult> {
   return new Promise((resolve, reject) => {
     const child = spawn('python3', [PYTHON_SCRIPT], {
-      env: { ...process.env, ...env } as NodeJS.ProcessEnv,
+      env: {
+        ...process.env,
+        ...env,
+        PYTHONPATH: [
+          path.join(path.dirname(PYTHON_SCRIPT), 'pydeps'),
+          process.env.PYTHONPATH,
+        ]
+          .filter(Boolean)
+          .join(path.delimiter),
+      } as NodeJS.ProcessEnv,
       stdio: ['pipe', 'pipe', 'pipe'],
     })
 
