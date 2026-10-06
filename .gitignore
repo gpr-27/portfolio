@@ -7,6 +7,7 @@ npm-debug.log*
 node_modules
 dist
 dist-ssr
+backend/scripts/pydeps
 *.local
 
 # Secrets / env — one root .env for the whole project (commit only the template)
