@@ -1,12 +1,15 @@
-# Render Blueprint — Docker web service (Node + Python Anthropic bridge for AgentRouter).
+# Render Blueprint — Node web service + vendored Python deps for AgentRouter.
 services:
   - type: web
     name: praneeth-portfolio
-    runtime: docker
+    runtime: node
     plan: free
     region: singapore
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    buildCommand: >-
+      npm install --include=dev &&
+      npm run build &&
+      python3 -m pip install -r backend/scripts/requirements.txt -t backend/scripts/pydeps
+    startCommand: npm start
     envVars:
       # ── Secrets — set these in the Render dashboard (never committed) ──
       - key: AGENTROUTER_API_KEY
