@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "render:setup-python": "python3 -m pip install -r backend/scripts/requirements.txt -t backend/scripts/pydeps",
+    "build": "npm run render:setup-python && tsc -b && vite build",
     "start": "tsx backend/server.ts",
     "preview": "vite preview"
   },
