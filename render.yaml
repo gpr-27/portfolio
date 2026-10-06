@@ -1,15 +1,12 @@
-# Render Blueprint — single Node web service.
-# One Express server (backend/server.ts) serves the built frontend (repo-root
-# dist/) AND the POST /api/chat + POST /api/contact endpoints. No Vercel.
-# Render reads this file from the repo root on a Blueprint deploy.
+# Render Blueprint — Docker web service (Node + Python Anthropic bridge for AgentRouter).
 services:
   - type: web
     name: praneeth-portfolio
-    runtime: node
+    runtime: docker
     plan: free
     region: singapore
-    buildCommand: "npm install --include=dev && npm run build"
-    startCommand: "npm start"
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
       # ── Secrets — set these in the Render dashboard (never committed) ──
       - key: AGENTROUTER_API_KEY
@@ -23,8 +20,10 @@ services:
         value: "20"
       - key: MONGODB_DB
         value: portfolio
-      - key: AGENTROUTER_USE_CYCLETLS
+      - key: AGENTROUTER_USE_PYTHON_BRIDGE
         value: "true"
+      - key: AGENTROUTER_USE_CYCLETLS
+        value: "false"
       - key: CONTACT_TO
         value: praneethg1830@gmail.com
       - key: CONTACT_FROM

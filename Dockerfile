@@ -30,7 +30,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Prod-only deps: express, mongodb, tsx, dotenv. No dev tooling in the runtime image.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 python3-pip \
+  && pip3 install --no-cache-dir -r backend/scripts/requirements.txt \
+  && rm -rf /var/lib/apt/lists/*
+
+# Prod-only deps: express, mongodb, tsx, dotenv, cycletls. No dev tooling in the runtime image.
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
