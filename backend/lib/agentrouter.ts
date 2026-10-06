@@ -203,6 +203,10 @@ async function callOpenAICompatible(
     text = reasoning
   }
 
+  if (!text.trim()) {
+    throw new Error(`AgentRouter returned an empty completion for model ${modelId}.`)
+  }
+
   const usage: UnifiedUsage = {
     inputTokens: data?.usage?.prompt_tokens,
     outputTokens: data?.usage?.completion_tokens,
@@ -290,6 +294,10 @@ async function callAnthropicCompatible(
 
   if (!text && reasoning) {
     text = reasoning
+  }
+
+  if (!text.trim()) {
+    throw new Error(`AgentRouter returned an empty completion for model ${modelId}.`)
   }
 
   const inputTokens = data?.usage?.input_tokens
