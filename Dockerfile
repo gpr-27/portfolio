@@ -34,13 +34,13 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Prod-only deps: express, mongodb, tsx, dotenv, cycletls. No dev tooling in the runtime image.
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
-
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/backend ./backend
 COPY --from=builder /app/tsconfig.json /app/tsconfig.app.json /app/tsconfig.node.json ./
+
+# Prod deps after backend/ exists (postinstall installs Python bridge deps into pydeps).
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
 USER root
 RUN apt-get update \

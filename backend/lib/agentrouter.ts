@@ -386,9 +386,12 @@ export async function chat(
       }
     } catch (bridgeErr) {
       console.error(
-        'Python AgentRouter bridge failed; falling back to HTTP:',
+        'Python AgentRouter bridge failed:',
         (bridgeErr as Error)?.message || bridgeErr
       )
+      if (shouldPreferPythonBridge(env)) {
+        throw bridgeErr
+      }
     }
   }
 

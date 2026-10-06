@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "render:setup-python": "rm -rf backend/scripts/pydeps && python3 -m pip install -r backend/scripts/requirements.txt -t backend/scripts/pydeps",
-    "postinstall": "npm run render:setup-python || true",
+    "postinstall": "npm run render:setup-python",
     "build": "npm run render:setup-python && tsc -b && vite build",
     "start": "tsx backend/server.ts",
     "preview": "vite preview"
