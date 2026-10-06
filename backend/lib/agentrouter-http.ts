@@ -28,12 +28,21 @@ export type PythonBridgeResult = {
   }
 }
 
-let cycleTls: { (url: string, options: object, method: string): Promise<unknown> } | null =
-  null
+type CycleTlsClient = (
+  url: string,
+  options: Record<string, unknown>,
+  method: string
+) => Promise<{ status: number; body?: unknown; data?: unknown }>
 
-async function getCycleTLS() {
+let cycleTls: CycleTlsClient | null = null
+
+async function getCycleTLS(): Promise<CycleTlsClient> {
   if (!cycleTls) {
-    const { default: initCycleTLS } = await import('cycletls')
+    const mod = await import('cycletls')
+    const initCycleTLS = (mod as { default?: () => Promise<CycleTlsClient> }).default
+    if (typeof initCycleTLS !== 'function') {
+      throw new Error('CycleTLS failed to load')
+    }
     cycleTls = await initCycleTLS()
   }
   return cycleTls
@@ -193,7 +202,7 @@ export async function agentRouterPost(
   }
 
   const first = await viaFetch()
-  if (isWafHtmlBody(first.rawText)) {
+  if (isWafHtmlBody(first.rawText) && !isVercelServerless() && shouldPreferCycleTls(env)) {
     return viaCycleTls()
   }
   return first
