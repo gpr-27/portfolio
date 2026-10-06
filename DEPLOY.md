@@ -30,7 +30,8 @@ This portfolio supports direct deployment to **Vercel** (recommended, serverless
 Single Node service serves `dist/` and `POST /api/chat` + `POST /api/contact`. Binds `0.0.0.0:$PORT` for Render.
 
 1. [Render Dashboard](https://dashboard.render.com) → **New → Blueprint**.
-2. Connect the GitHub repository (uses `render.yaml`).
-3. Add secret environment variables (`AGENTROUTER_API_KEY`, `MONGODB_URI`, `RESEND_API_KEY`).
-4. Click **Apply**.
+2. Connect the GitHub repository (uses `render.yaml` — **Docker** image with Node + Python for the AgentRouter bridge).
+3. Add secret environment variables (`AGENTROUTER_API_KEY`, optional alias `AXON_API_KEY`, `MONGODB_URI`, `RESEND_API_KEY`).
+4. Set `CORS_ORIGINS` to your Vercel site (e.g. `https://portfolio-black-six-34.vercel.app`) if the frontend is on Vercel.
+5. Click **Apply**. After switching from native Node to Docker, trigger a **Manual Deploy** once if chat still fails.
 

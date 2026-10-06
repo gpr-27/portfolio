@@ -1,18 +1,17 @@
-# Render Blueprint — Node web service + vendored Python deps for AgentRouter.
+# Render Blueprint — Docker (Node + Python3 for AgentRouter bridge).
 services:
   - type: web
     name: praneeth-portfolio
-    runtime: node
+    runtime: docker
     plan: free
     region: singapore
-    buildCommand: >-
-      npm install --include=dev &&
-      npm run build &&
-      python3 -m pip install -r backend/scripts/requirements.txt -t backend/scripts/pydeps
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
       # ── Secrets — set these in the Render dashboard (never committed) ──
       - key: AGENTROUTER_API_KEY
+        sync: false
+      - key: AXON_API_KEY
         sync: false
       - key: MONGODB_URI
         sync: false

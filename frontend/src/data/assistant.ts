@@ -19,6 +19,7 @@ export interface ModelOption {
 export const AI_MODELS: ModelOption[] = [
   { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash', tag: 'Fast' },
   { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', tag: 'Smart' },
+  { id: 'gpt-6-astra', name: 'GPT-6 Astra', tag: 'Latest' },
   { id: 'claude-opus-5', name: 'Claude Opus 5', tag: 'Reasoning' },
   { id: 'claude-opus-4-8', name: 'Claude Opus 4.8', tag: 'Accurate' },
 ]

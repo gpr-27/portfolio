@@ -8,6 +8,10 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 python3-pip \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install deps first for good layer caching: this layer is reused
 # whenever package*.json are unchanged, even if source changes.
 COPY package.json package-lock.json ./
@@ -41,7 +45,7 @@ COPY --from=builder /app/tsconfig.json /app/tsconfig.app.json /app/tsconfig.node
 USER root
 RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 python3-pip \
-  && pip3 install --no-cache-dir -r backend/scripts/requirements.txt \
+  && python3 -m pip install --no-cache-dir -r backend/scripts/requirements.txt -t backend/scripts/pydeps \
   && rm -rf /var/lib/apt/lists/*
 
 # Drop root: run as the unprivileged `node` user that ships with the base image.
