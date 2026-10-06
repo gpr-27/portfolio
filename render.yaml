@@ -25,7 +25,7 @@ services:
       - key: AGENTROUTER_USE_PYTHON_BRIDGE
         value: "true"
       - key: AGENTROUTER_USE_CYCLETLS
-        value: "false"
+        value: "true"
       - key: CONTACT_TO
         value: praneethg1830@gmail.com
       - key: CONTACT_FROM

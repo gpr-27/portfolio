@@ -366,22 +366,29 @@ export async function chat(
   const { messages, system, temperature = 0.7, maxTokens = 4096 } = options
 
   if (shouldPreferPythonBridge(env)) {
-    const bridged = await agentRouterViaPythonBridge(
-      {
-        protocol: modelConfig.protocol,
-        model: modelConfig.id,
-        messages: buildPythonBridgeMessages(messages),
-        system,
-        max_tokens: maxTokens,
-        temperature,
-      },
-      env
-    )
-    return {
-      model: bridged.model,
-      text: bridged.text,
-      reasoning: bridged.reasoning,
-      usage: bridged.usage,
+    try {
+      const bridged = await agentRouterViaPythonBridge(
+        {
+          protocol: modelConfig.protocol,
+          model: modelConfig.id,
+          messages: buildPythonBridgeMessages(messages),
+          system,
+          max_tokens: maxTokens,
+          temperature,
+        },
+        env
+      )
+      return {
+        model: bridged.model,
+        text: bridged.text,
+        reasoning: bridged.reasoning,
+        usage: bridged.usage,
+      }
+    } catch (bridgeErr) {
+      console.error(
+        'Python AgentRouter bridge failed; falling back to HTTP:',
+        (bridgeErr as Error)?.message || bridgeErr
+      )
     }
   }
 
