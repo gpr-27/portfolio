@@ -1,14 +1,13 @@
-# Render Blueprint — Docker (Node + Python3 for AgentRouter bridge).
+# Render Blueprint — Node web service + Python AgentRouter bridge (Axon-compatible).
 services:
   - type: web
     name: praneeth-portfolio
-    runtime: docker
+    runtime: node
     plan: free
     region: singapore
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    buildCommand: "npm install --include=dev && npm run build"
+    startCommand: "npm start"
     envVars:
-      # ── Secrets — set these in the Render dashboard (never committed) ──
       - key: AGENTROUTER_API_KEY
         sync: false
       - key: AXON_API_KEY
@@ -17,7 +16,6 @@ services:
         sync: false
       - key: RESEND_API_KEY
         sync: false
-      # ── Non-secret config — committed here, applied automatically ──
       - key: NODE_VERSION
         value: "20"
       - key: MONGODB_DB
@@ -25,7 +23,7 @@ services:
       - key: AGENTROUTER_USE_PYTHON_BRIDGE
         value: "true"
       - key: AGENTROUTER_USE_CYCLETLS
-        value: "true"
+        value: "false"
       - key: CONTACT_TO
         value: praneethg1830@gmail.com
       - key: CONTACT_FROM
