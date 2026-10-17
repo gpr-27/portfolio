@@ -137,34 +137,6 @@ export const projects: Project[] = [
     featured: true,
   },
   {
-    id: 'nifty-signal-pod',
-    title: 'NIFTY Signal Pod',
-    tagline: 'A fine-tuned small LM that turns options snapshots into trading signals.',
-    kind: 'AI/ML · Fine-Tuning',
-    period: '2026',
-    problem:
-      'Reading a NIFTY 50 options market-state snapshot into a disciplined, machine-readable trade call is noisy and inconsistent.',
-    approach:
-      'Fine-tuned TinyLlama-1.1B with LoRA on Kaggle (T4) to emit a structured JSON signal, wrapped in a deterministic orchestrator that applies three suppression rules — plus a pre-committed eval suite and a RAG ablation.',
-    outcome:
-      'A reproducible quant pipeline: adapter + orchestrator + MLflow tracking, with eval thresholds committed before training to keep the experiment honest.',
-    highlights: [
-      'LoRA / PEFT fine-tune of TinyLlama-1.1B emitting structured JSON signals',
-      'Deterministic 3-rule orchestrator: ADX gate, parse gate, and conviction gate',
-      'Two-condition RAG ablation + MLflow-tracked eval suite committed before training',
-    ],
-    stack: ['TinyLlama', 'LoRA / PEFT', 'PyTorch', 'RAG', 'MLflow'],
-    metrics: [
-      { value: 1.1, decimals: 1, suffix: 'B', label: 'Params Fine-Tuned' },
-      { value: 3, label: 'Suppression Rules' },
-    ],
-    links: {
-      github: 'https://github.com/gpr-27/nifty-signal-pod',
-      kaggle: 'https://www.kaggle.com/code/praneethg27/notebook9997f4f4e6',
-    },
-    featured: true,
-  },
-  {
     id: 'kairos-ai',
     title: 'Kairos AI',
     tagline: 'A Socratic AI tutor for DSA, competitive programming & system design.',
@@ -286,76 +258,6 @@ export const projects: Project[] = [
       demo: 'https://envoy-agentic-dating.vercel.app',
     },
   },
-  {
-    id: 'redrob',
-    title: 'Redrob Candidate Ranker',
-    tagline: 'Picks the top 100 from 100,000 candidates — and catches the honeypots.',
-    kind: 'AI/ML · Ranking',
-    period: '2026',
-    highlights: [
-      'Seven weighted scoring dimensions encode the JD rubric instead of keyword matching',
-      'Multi-signal honeypot detector catches impossible profiles (e.g. tenure before a company existed)',
-      'Fact-only reasoning per candidate; pure-stdlib Python, ranks 100K profiles in ~10 s on CPU',
-    ],
-    stack: ['Python', 'Streamlit', 'Hugging Face Spaces'],
-    metrics: [
-      { value: 100, suffix: 'K', label: 'Profiles Ranked' },
-      { value: 10, prefix: '~', suffix: 's', label: 'On CPU' },
-    ],
-    links: {
-      github: 'https://github.com/gpr-27/redrob-candidate-ranking',
-      demo: 'https://huggingface.co/spaces/praneethg27/redrob-ranker',
-    },
-  },
-  {
-    id: 'legixo-qa',
-    title: 'Legixo — Legal Q&A',
-    tagline: 'Grounded Q&A over legal documents that cites its chunks — or abstains.',
-    kind: 'AI/ML · Agentic RAG',
-    period: '2026',
-    highlights: [
-      'LangGraph loop: expand → retrieve → grade → generate / refine / give up, with bounded retries',
-      'Every answer cites exact source chunks, and says so when the documents lack the answer',
-      'Gold-set evaluation checks both citation accuracy and abstain correctness',
-    ],
-    stack: ['LangGraph', 'Pinecone', 'FastAPI', 'Groq', 'Gemini Embeddings'],
-    links: {
-      github: 'https://github.com/gpr-27/legixo-qa',
-    },
-  },
-  {
-    id: 'attendly',
-    title: 'Attendly',
-    tagline: 'A personal AI attendance co-pilot — mark classes, track bunk %, plan skips.',
-    kind: 'Full-Stack · AI',
-    period: '2026',
-    highlights: [
-      'Installable PWA with an offline Dexie cache and Supabase as the source of truth',
-      'Gemini parses timetable photos; a Groq-powered coach gives attendance insights',
-      'Clerk auth, cross-device sync, and PDF attendance export',
-    ],
-    stack: ['Next.js', 'TypeScript', 'Supabase', 'Clerk', 'Dexie', 'Groq', 'Gemini'],
-    links: {
-      github: 'https://github.com/gpr-27/attendly',
-      demo: 'https://attendly-navy.vercel.app',
-    },
-  },
-  {
-    id: 'iiitt-confessions',
-    title: 'IIIT Trichy Confessions',
-    tagline: 'A live anonymous campus platform with real-time chat and push notifications.',
-    kind: 'Full-Stack',
-    period: '2026',
-    highlights: [
-      'In production with real campus users; additive, backward-compatible API releases',
-      'Socket.IO real-time chat, web push, profanity filtering, and per-IP rate limiting',
-      'Next.js frontend on Vercel with an Express 5 + MongoDB API on Render',
-    ],
-    stack: ['Next.js', 'React 19', 'Express 5', 'Socket.IO', 'MongoDB', 'Playwright'],
-    links: {
-      demo: 'https://iiitt-confessions.vercel.app',
-    },
-  },
 
   // ---------------- GRID ----------------
   {
@@ -453,6 +355,23 @@ export const projects: Project[] = [
     stack: ['Machine Learning', 'XGBoost', 'Predictive Analytics'],
     metrics: [{ value: 6, label: 'Models Benchmarked' }],
     links: {},
+  },
+  {
+    id: 'portfolio',
+    title: 'This Portfolio',
+    tagline: 'The site you’re on — with a grounded AI assistant that answers as me.',
+    kind: 'Full-Stack · AI',
+    period: '2026',
+    highlights: [
+      'Every section is rendered from one typed data source shared with the chat assistant',
+      'AI assistant grounded only in on-page facts, served from a Vercel Python function',
+      'Light / dark themes, smooth scroll, and a contact form backed by MongoDB',
+    ],
+    stack: ['React', 'TypeScript', 'Vite', 'Python', 'Vercel', 'MongoDB'],
+    links: {
+      github: 'https://github.com/gpr-27/portfolio',
+      demo: 'https://portfolio-black-six-34.vercel.app',
+    },
   },
 ]
 

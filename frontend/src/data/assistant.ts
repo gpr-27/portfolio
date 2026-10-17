@@ -141,7 +141,7 @@ export function localAnswer(raw: string): string {
   // Projects overview
   if (/(projects?|work|built|build|made|portfolio|case stud)/.test(q)) {
     const featured = projects.filter((p) => p.featured).map((p) => p.title)
-    return `I’ve built ${projects.length}+ projects. A few highlights: ${list(featured)}. Ask me about any one for the full case study.`
+    return `I’ve built ${projects.length} projects. A few highlights: ${list(featured)}. Ask me about any one for the full case study.`
   }
 
   // Skills
