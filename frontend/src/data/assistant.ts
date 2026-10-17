@@ -1,6 +1,6 @@
 /* ============================================================
    AI ASSISTANT — grounded ONLY in what's on this site.
-   - CHAT_ENDPOINT: API endpoint to use AgentRouter (DeepSeek V4 Flash, GPT-5.6 Sol, Claude Opus 5/4.8).
+   - CHAT_ENDPOINT: API endpoint backed by Groq (GPT-OSS 120B / 20B, Qwen 3.8 27B).
    - Until then, localAnswer() is a smart offline fallback built from
      the same on-page data. It speaks in first person (as Praneeth),
      answers greetings + "what can you do", and REFUSES anything
@@ -17,14 +17,12 @@ export interface ModelOption {
 }
 
 export const AI_MODELS: ModelOption[] = [
-  { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash', tag: 'Fast' },
-  { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', tag: 'Smart' },
-  { id: 'gpt-6-astra', name: 'GPT-6 Astra', tag: 'Latest' },
-  { id: 'claude-opus-5', name: 'Claude Opus 5', tag: 'Reasoning' },
-  { id: 'claude-opus-4-8', name: 'Claude Opus 4.8', tag: 'Accurate' },
+  { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', tag: 'Smart' },
+  { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B', tag: 'Balanced' },
+  { id: 'qwen/qwen3.8-27b', name: 'Qwen 3.8 27B', tag: 'Fastest' },
 ]
 
-export const DEFAULT_MODEL_ID = 'deepseek-v4-flash'
+export const DEFAULT_MODEL_ID = 'openai/gpt-oss-120b'
 
 /**
  * Backend API path. Defaults to the same-origin `/api/chat`

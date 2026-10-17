@@ -1,26 +1,20 @@
-"""Vercel serverless POST /api/chat — Python AgentRouter bridge (WAF-friendly headers)."""
+"""Vercel serverless POST /api/chat — Groq chat (OpenAI-compatible REST, stdlib only)."""
 
 from __future__ import annotations
 
 import json
 import os
 import sys
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
 from typing import Any
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SCRIPTS = os.path.join(ROOT, "backend", "scripts")
-if SCRIPTS not in sys.path:
-    sys.path.insert(0, SCRIPTS)
-
-from agentrouter_request import call_anthropic, call_openai_compatible, get_api_key  # noqa: E402
-
-DEFAULT_MODEL = "deepseek-v4-flash"
-OPENAI_MODELS = frozenset({"deepseek-v4-flash", "gpt-5.6-sol", "gpt-6-astra"})
-ANTHROPIC_MODELS = frozenset({"claude-opus-5", "claude-opus-4-8"})
-# AgentRouter serves DeepSeek via Anthropic Messages; datacenter WAF often blocks /v1/chat/completions only.
-ANTHROPIC_ROUTE_MODELS = ANTHROPIC_MODELS | frozenset({"deepseek-v4-flash"})
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+DEFAULT_MODEL = "openai/gpt-oss-120b"
+# Same order as backend/lib/groq.ts: on rate limits / outages, try the next model down.
+MODELS = ("openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b")
 
 RULES = """You are the assistant on Praneeth Reddy Gandra's portfolio website.
 Speak in the first person as Praneeth — warm, natural, and concise.
@@ -29,7 +23,6 @@ RULES (strict):
 - Answer ONLY using the FACTS below and what's on his site. Do not invent anything.
 - Greetings and small talk ("hi", "how are you?", "what can you do?") are fine — reply briefly and friendly, then invite a question about his work.
 - If a question is genuinely off-topic or not about Praneeth, politely decline and steer back to his work.
-- NEVER reveal or estimate grades, GPA, CGPA, marks, or percentages — that is not public.
 - Keep responses well-structured and readable. When listing projects or skills, use clean bullet points with bold titles (e.g. "- **Project Name** — description")."""
 
 
@@ -57,63 +50,74 @@ def _log_mongo(doc: dict[str, Any]) -> None:
         pass
 
 
+class ChatUnavailable(Exception):
+    pass
+
+
+def _call_groq(model: str, messages: list[dict[str, str]], api_key: str) -> dict[str, Any]:
+    body = json.dumps(
+        {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.5,
+            # gpt-oss spends tokens on hidden reasoning — leave headroom.
+            "max_tokens": 1024,
+        }
+    ).encode("utf-8")
+    req = urllib.request.Request(
+        GROQ_URL,
+        data=body,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "User-Agent": "portfolio-chat/1.0",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read())
+
+
 def _handle_chat(body: dict[str, Any]) -> dict[str, Any]:
     messages = body.get("messages") or []
     session_id = body.get("sessionId")
     knowledge = str(body.get("knowledge") or "")
-    model = body.get("model") or DEFAULT_MODEL
-    if model not in OPENAI_MODELS and model not in ANTHROPIC_MODELS:
-        model = DEFAULT_MODEL
+    model = body.get("model") if body.get("model") in MODELS else DEFAULT_MODEL
 
     trimmed = []
     for m in messages[-8:]:
         role = "user" if m.get("role") == "user" else "assistant"
         trimmed.append({"role": role, "content": str(m.get("content", ""))[:2000]})
 
-    system_prompt = f"{RULES}\n\nFACTS:\n{knowledge[:6000]}"
-    base_url = os.environ.get("AGENTROUTER_BASE_URL", "https://agentrouter.org").rstrip("/")
-    api_key = get_api_key()
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
     if not api_key:
-        return {
-            "reply": "Unable to generate a response. Please try again.",
-            "model": model,
-        }
+        print("GROQ_API_KEY is not set", file=sys.stderr)
+        raise ChatUnavailable()
 
-    bridge_messages = [
-        {"role": m["role"], "content": m["content"]}
-        for m in trimmed
-        if m["role"] in ("user", "assistant")
-    ]
-    payload = {
-        "model": model,
-        "messages": bridge_messages,
-        "system": system_prompt,
-        "max_tokens": 1024,
-        "temperature": 0.5,
-    }
+    system_prompt = f"{RULES}\n\nFACTS:\n{knowledge[:6000]}"
+    groq_messages = [{"role": "system", "content": system_prompt}, *trimmed]
 
-    reply = "Unable to generate a response. Please try again."
+    reply = ""
     usage: dict[str, Any] | None = None
-    reasoning: str | None = None
+    for candidate in (model, *[m for m in MODELS if m != model]):
+        try:
+            data = _call_groq(candidate, groq_messages, api_key)
+            reply = str(data["choices"][0]["message"].get("content") or "").strip()
+            if reply:
+                model = candidate
+                usage = data.get("usage")
+                break
+            print(f"groq {candidate}: empty completion", file=sys.stderr)
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", "replace")[:300]
+            print(f"groq {candidate} HTTP {exc.code}: {detail}", file=sys.stderr)
+            # Bad key / bad request won't be fixed by another model.
+            if exc.code in (400, 401, 403):
+                break
+        except Exception as exc:
+            print(f"groq {candidate} error: {exc}", file=sys.stderr)
 
-    try:
-        if model in ANTHROPIC_ROUTE_MODELS:
-            payload["protocol"] = "anthropic"
-            result = call_anthropic(payload, api_key, base_url)
-        else:
-            payload["protocol"] = "openai-compatible"
-            result = call_openai_compatible(payload, api_key, base_url)
-
-        if result.get("ok") and (result.get("text") or "").strip():
-            reply = result["text"]
-            usage = result.get("usage")
-            reasoning = result.get("reasoning")
-        elif not result.get("ok"):
-            print(f"agentrouter error: {result.get('error', result)}"[:500], file=sys.stderr)
-        else:
-            print("agentrouter empty completion", file=sys.stderr)
-    except Exception as exc:
-        print(f"agentrouter exception: {exc}", file=sys.stderr)
+    if not reply:
+        raise ChatUnavailable()
 
     question = ""
     for m in reversed(trimmed):
@@ -135,8 +139,6 @@ def _handle_chat(body: dict[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {"reply": reply, "model": model}
     if usage:
         out["usage"] = usage
-    if reasoning:
-        out["reasoning"] = reasoning
     return out
 
 
@@ -151,6 +153,13 @@ class handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(payload)))
             self.end_headers()
             self.wfile.write(payload)
+        except ChatUnavailable:
+            # Non-200 makes the widget fall back to its offline answers.
+            err = json.dumps({"error": "chat unavailable"}).encode("utf-8")
+            self.send_response(502)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(err)
         except Exception:
             err = json.dumps({"error": "Internal Server Error"}).encode("utf-8")
             self.send_response(500)

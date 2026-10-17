@@ -6,7 +6,7 @@ responsive, with a cream/night theme toggle, a grounded AI chat assistant, and a
 contact form.
 
 - **Frontend:** React 19 + Vite + TypeScript, Framer Motion, Lenis smooth scroll
-- **Backend:** Express & Vercel serverless (AgentRouter + MongoDB Atlas + Resend)
+- **Backend:** Express & Vercel serverless (Groq + MongoDB Atlas + Resend)
 - **Deploy:** Vercel (frontend + serverless `/api/*`)
 - **Type:** Cormorant Garamond (display) · Inter (body) · JetBrains Mono (code)
 - **Palette:** cream `#faf9f5` · coral `#cc785c` · navy `#181715`
@@ -22,14 +22,14 @@ frontend/             ← Vite app
   public/             ← static assets (resume.pdf, photo, favicon)
 
 api/                  ← Vercel serverless functions
-  chat.py             ← POST /api/chat (Python AgentRouter bridge)
+  chat.py             ← POST /api/chat (Python, calls Groq)
   contact.ts          ← POST /api/contact
 
 backend/              ← Node/Express server (local / Docker) + shared lib for Vercel
   server.ts           ← Express: serves dist/ + POST /api/chat + POST /api/contact
   lib/
-    agentrouter.ts    ← AgentRouter multi-model provider (DeepSeek, GPT, Claude)
-    chat-core.ts      ← handleChat()  → AgentRouter + MongoDB logging
+    groq.ts           ← Groq chat provider (GPT-OSS 120B / 20B, Qwen 3.8 27B)
+    chat-core.ts      ← handleChat()  → Groq + MongoDB logging
     contact-core.ts   ← handleContact() → MongoDB + Resend email
     mongo.ts          ← cached MongoDB client
 
@@ -85,7 +85,7 @@ is grounded by a fact-sheet generated from `resume.ts` + `projects.ts`
 (`buildKnowledge()` — nothing hardcoded).
 
 - **Offline (no backend):** a smart keyword fallback answers from the same data.
-- **Live (with backend):** `handleChat()` calls **AgentRouter** (supports DeepSeek V4 Flash, GPT-5.6 Sol, Claude Opus 5, Claude Opus 4.8; key server-side) and logs
+- **Live (with backend):** `handleChat()` calls **Groq** (GPT-OSS 120B default, GPT-OSS 20B, Qwen 3.8 27B; key server-side) and logs
   every `{ question, answer, sessionId, createdAt }` to **MongoDB Atlas**
   (`chat_logs`). Only you read it (Atlas UI / Compass).
 

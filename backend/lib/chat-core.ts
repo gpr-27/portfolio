@@ -3,7 +3,7 @@ import {
   DEFAULT_MODEL_ID,
   AVAILABLE_MODELS,
   type UnifiedUsage,
-} from './agentrouter.js'
+} from './groq.js'
 
 // Chat handler used by the Express server (backend/server.ts) and the
 // Vite dev middleware (vite.config.ts). One source of truth — no dupes.
@@ -17,7 +17,6 @@ RULES (strict):
 - Answer ONLY using the FACTS below and what's on his site. Do not invent anything.
 - Greetings and small talk ("hi", "how are you?", "what can you do?") are fine — reply briefly and friendly, then invite a question about his work.
 - If a question is genuinely off-topic or not about Praneeth, politely decline and steer back to his work.
-- NEVER reveal or estimate grades, GPA, CGPA, marks, or percentages — that is not public.
 - Keep responses well-structured and readable. When listing projects or skills, use clean bullet points with bold titles (e.g. "- **Project Name** — description").`
 
 interface ChatBody {
@@ -31,7 +30,12 @@ export interface ChatResponse {
   reply: string
   model?: string
   usage?: UnifiedUsage
-  reasoning?: string
+}
+
+export class ChatUnavailableError extends Error {
+  constructor() {
+    super('chat unavailable')
+  }
 }
 
 type Env = Record<string, string | undefined>
@@ -66,9 +70,9 @@ export async function handleChat(body: ChatBody, env: Env): Promise<ChatResponse
 
   const systemPrompt = `${RULES}\n\nFACTS:\n${String(knowledge).slice(0, 6000)}`
 
-  let reply = 'Sorry — I had trouble answering just now.'
+  let reply: string
+  let usedModel = selectedModel
   let usage: UnifiedUsage | undefined
-  let reasoning: string | undefined
 
   try {
     const result = await chat(
@@ -81,15 +85,13 @@ export async function handleChat(body: ChatBody, env: Env): Promise<ChatResponse
       },
       env
     )
-    if (result.text) {
-      reply = result.text
-    }
+    reply = result.text
+    usedModel = result.model
     usage = result.usage
-    reasoning = result.reasoning
   } catch (err: unknown) {
-    // Fallback safe error response
-    console.error('AgentRouter chat error:', (err as Error)?.message || err)
-    reply = 'Unable to generate a response. Please try again.'
+    // Surface as an error so the widget falls back to its offline answers.
+    console.error('Groq chat error:', (err as Error)?.message || err)
+    throw new ChatUnavailableError()
   }
 
   const question = [...trimmed].reverse().find((m) => m.role === 'user')?.content ?? ''
@@ -97,10 +99,10 @@ export async function handleChat(body: ChatBody, env: Env): Promise<ChatResponse
     sessionId,
     question,
     answer: reply,
-    model: selectedModel,
+    model: usedModel,
     usage,
     createdAt: new Date(),
   })
 
-  return { reply, model: selectedModel, usage, reasoning }
+  return { reply, model: usedModel, usage }
 }

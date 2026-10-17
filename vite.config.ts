@@ -45,7 +45,7 @@ export default defineConfig(({ command: _command, mode }) => {
                 res.statusCode = 200
                 res.end(JSON.stringify(out))
               } catch {
-                res.statusCode = 500
+                res.statusCode = 502
                 res.end(JSON.stringify({ error: 'dev api failed' }))
               }
             })

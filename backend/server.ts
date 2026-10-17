@@ -36,7 +36,7 @@ app.post('/api/chat', async (req, res) => {
     const out = await handleChat(req.body || {}, process.env);
     res.json(out);
   } catch {
-    res.status(400).json({ error: 'bad request' });
+    res.status(502).json({ error: 'chat unavailable' });
   }
 });
 

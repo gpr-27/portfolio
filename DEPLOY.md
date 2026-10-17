@@ -12,30 +12,18 @@ Production site: **https://portfolio-black-six-34.vercel.app/** — frontend and
 
    | Variable | Required | Notes |
    |----------|----------|--------|
-   | `AGENTROUTER_API_KEY` | Yes | AgentRouter secret API key |
+   | `GROQ_API_KEY` | Yes | Groq API key for the chat assistant |
    | `MONGODB_URI` | Optional | Chat logs + contact messages |
    | `MONGODB_DB` | Optional | Default `portfolio` |
    | `RESEND_API_KEY` | Optional | Contact form email |
    | `CONTACT_TO` | Optional | e.g. `praneethg1830@gmail.com` |
    | `CONTACT_FROM` | Optional | e.g. `Portfolio <onboarding@resend.dev>` |
-   | `AGENTROUTER_HTTPS_PROXY` | **Often required on Vercel** | HTTPS proxy with non-datacenter egress when logs show Aliyun WAF (secret — never commit) |
-   | `AGENTROUTER_USE_PYTHON_BRIDGE` | Optional | Leave unset on Vercel (Python `api/chat.py` handles AgentRouter) |
 
-3. **Deploy**: push to `main` (or run `npx vercel deploy --prod`). Builds run `npm run build`; serverless handlers are `api/chat.py` (Python + httpx/Anthropic bridge) and `api/contact.ts` (Node).
+3. **Deploy**: push to `main` (or run `npx vercel deploy --prod`). Builds run `npm run build`; serverless handlers are `api/chat.py` (Python, calls Groq) and `api/contact.ts` (Node).
 
-### AgentRouter / WAF
+### Chat models (Groq)
 
-`agentrouter.org` sits behind an **Aliyun WAF** that often blocks **datacenter egress** on `/v1/chat/completions`. Production `/api/chat` routes **DeepSeek** and Claude models through the **Anthropic Messages API** (Anthropic SDK + `auth_token`). GPT models still use OpenAI-compatible `/v1/chat/completions`; if Vercel logs show `AgentRouter blocked request (Aliyun WAF)`, the API key is fine but datacenter egress is blocked for that path.
-
-Mitigations (pick one):
-
-- Ask AgentRouter to **allowlist** your Vercel deployment egress (or use a provider that offers static outbound IPs).
-- Set **`AGENTROUTER_HTTPS_PROXY`** on Vercel (Production):
-  1. Open [Vercel Dashboard](https://vercel.com) → your **portfolio** project → **Settings** → **Environment Variables**.
-  2. **Add** → Name: `AGENTROUTER_HTTPS_PROXY`, Value: your provider’s HTTPS proxy URL (e.g. `https://user:pass@gate.provider.com:10000`), Environment: **Production** (and Preview if needed).
-  3. **Save**, then **Deployments** → ⋮ on latest → **Redeploy** (or push to `main`).
-  4. Confirm logs no longer show `AgentRouter blocked request (Aliyun WAF)`.
-- Run chat locally via `npm run dev` (residential IP) while the portfolio UI stays on Vercel.
+`/api/chat` calls Groq's OpenAI-compatible API with `GROQ_API_KEY`. The widget offers **GPT-OSS 120B** (default), **GPT-OSS 20B**, and **Qwen 3.8 27B**; on a rate limit or outage the backend falls through to the next model. If every model fails, the API returns 502 and the widget answers from its offline, on-page fallback.
 
 ### MongoDB Atlas
 
@@ -50,4 +38,4 @@ npm run build
 npm start   # Express on PORT (default 3000), serves dist/ + /api
 ```
 
-Docker (`docker compose up --build`) uses the same Express stack with the Python AgentRouter bridge installed in the image for Linux hosts where WAF is strict.
+Docker (`docker compose up --build`) uses the same Express stack and reads `GROQ_API_KEY` from `.env`.
