@@ -4,9 +4,8 @@ interface Props {
 }
 
 /**
- * Praneeth's mark — a two-tone editorial spark (north-star sparkle).
- * Deliberately distinct from Anthropic's even asterisk: a 4-point
- * twinkle in ink with a small coral companion spark.
+ * Praneeth's mark — an isometric tensor block: three faces of a
+ * compact cube (ML lattice / structured data), top face in coral.
  */
 export function BrandMark({ size = 22, className }: Props) {
   return (
@@ -18,14 +17,13 @@ export function BrandMark({ size = 22, className }: Props) {
       fill="none"
       aria-hidden
     >
+      <path d="M5 10.5 12 14v8.5L5 19V10.5Z" fill="currentColor" />
       <path
-        d="M11.4 1.8c.45 6.1 2.1 8.95 9 9.4-6.9.45-8.55 3.3-9 9.4-.45-6.1-2.1-8.95-9-9.4 6.9-.45 8.55-3.3 9-9.4Z"
+        d="M12 14 19 10.5V19L12 22.5V14Z"
         fill="currentColor"
+        opacity="0.5"
       />
-      <path
-        d="M19.2 3.2c.16 2.1.74 3.08 2.8 3.25-2.06.17-2.64 1.15-2.8 3.25-.16-2.1-.74-3.08-2.8-3.25 2.06-.17 2.64-1.15 2.8-3.25Z"
-        fill="var(--primary)"
-      />
+      <path d="M5 10.5 12 7l7 3.5-7 3.5-7-3.5Z" fill="var(--primary)" />
     </svg>
   )
 }

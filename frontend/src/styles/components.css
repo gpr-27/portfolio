@@ -450,6 +450,65 @@ body.has-cursor textarea {
   gap: 0.5rem;
 }
 
+/* ---------- Experience ---------- */
+.xp {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
+}
+.xp__row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2rem;
+  padding: 1.8rem 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.xp__row > * {
+  min-width: 0;
+}
+.xp__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.xp__period {
+  font-size: 0.8rem;
+  color: var(--ink);
+}
+.xp__focus {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.xp__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.xp__role {
+  font-weight: 500;
+  color: var(--body);
+}
+.xp__points {
+  margin: 0.9rem 0 1rem;
+  padding-left: 1.1rem;
+  color: var(--body);
+  line-height: 1.6;
+}
+.xp__points li + li {
+  margin-top: 0.45rem;
+}
+.xp__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 /* ---------- About ---------- */
 .about__grid {
   display: grid;
@@ -527,6 +586,20 @@ body.has-cursor textarea {
   margin-top: 0.4rem;
   color: var(--muted);
   font-size: 0.78rem;
+}
+.rec__grade {
+  display: block;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+.rec__item + .rec__item {
+  margin-top: 1rem;
+}
+.about__courses {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
 }
 .rec__cert {
   display: flex;
@@ -906,7 +979,8 @@ body.has-cursor textarea {
     grid-template-columns: 1fr;
     padding-left: 0;
   }
-  .ledger__row {
+  .ledger__row,
+  .xp__row {
     grid-template-columns: 1fr;
     gap: 0.8rem;
   }

@@ -4,12 +4,13 @@ import { BrandMark } from './BrandMark'
 import { ThemeToggle } from './ThemeSwitcher'
 
 const links = [
+  { id: 'experience', label: 'Experience' },
   { id: 'work', label: 'Work' },
   { id: 'skills', label: 'Skills' },
   { id: 'about', label: 'About' },
   { id: 'contact', label: 'Contact' },
 ]
-const SECTION_IDS = ['home', 'work', 'skills', 'about', 'contact']
+const SECTION_IDS = ['home', 'experience', 'work', 'skills', 'about', 'contact']
 
 interface Props {
   scrollTo: (id: string) => void

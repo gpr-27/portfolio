@@ -1,4 +1,4 @@
-import { achievement, certifications, education, profile } from '../data/resume'
+import { achievement, certifications, coursework, education, profile, programs } from '../data/resume'
 import { SectionHeading } from '../components/SectionHeading'
 import { Reveal } from '../components/Reveal'
 import { CodeWindow } from '../components/CodeWindow'
@@ -10,7 +10,7 @@ export function About() {
       <div className="container">
         <SectionHeading
           eyebrow="About"
-          index="§ 03"
+          index="§ 04"
           title={
             <>
               Turning <span className="coral">research-grade AI</span> into things that run.
@@ -73,6 +73,7 @@ export function About() {
                 <span className="rec__meta mono">
                   {education.period} · {education.location}
                 </span>
+                <span className="rec__grade mono">{education.grades}</span>
               </div>
             </Reveal>
 
@@ -85,6 +86,21 @@ export function About() {
                 <span className="rec__sub">
                   {achievement.org} · {achievement.year}
                 </span>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.09}>
+              <div className="rec">
+                <div className="rec__head">Programs</div>
+                {programs.map((p) => (
+                  <div key={p.title} className="rec__item">
+                    <strong className="rec__title">{p.title}</strong>
+                    <span className="rec__sub">{p.note}</span>
+                    <span className="rec__meta mono">
+                      {p.org} · {p.date}
+                    </span>
+                  </div>
+                ))}
               </div>
             </Reveal>
 
@@ -105,6 +121,23 @@ export function About() {
               </div>
             </Reveal>
           </aside>
+        </div>
+
+        <div className="ledger about__courses">
+          {Object.entries(coursework).map(([label, items]) => (
+            <Reveal key={label}>
+              <div className="ledger__row">
+                <span className="ledger__term">{label}</span>
+                <span className="ledger__def">
+                  {items.map((c) => (
+                    <span key={c} className="badge">
+                      {c}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>

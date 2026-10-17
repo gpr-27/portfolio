@@ -4,10 +4,10 @@
    - Until then, localAnswer() is a smart offline fallback built from
      the same on-page data. It speaks in first person (as Praneeth),
      answers greetings + "what can you do", and REFUSES anything
-     off-topic. It never discusses grades/GPA (not on the site).
+     off-topic.
    ============================================================ */
 
-import { achievement, certifications, education, profile, skillGroups, socials } from './resume'
+import { achievement, certifications, education, experience, profile, programs, skillGroups, socials } from './resume'
 import { projects } from './projects'
 
 export interface ModelOption {
@@ -37,9 +37,10 @@ export const CHAT_ENDPOINT =
   (import.meta.env.VITE_CHAT_ENDPOINT as string | undefined) ?? '/api/chat'
 
 export const GREETING =
-  'Hey, thanks for visiting! 👋 I’m Praneeth’s assistant — ask me about his projects, skills, education, or how to get in touch.'
+  'Hey, thanks for visiting! 👋 I’m Praneeth’s assistant — ask me about his experience, projects, skills, education, or how to get in touch.'
 
 export const SUGGESTIONS = [
+  'Where has he interned?',
   'What has he built?',
   'His AI/ML skills',
   'Education',
@@ -72,14 +73,19 @@ export function buildKnowledge(): string {
     .join('\n')
   const certs = certifications.map((c) => `${c.title} (${c.issuer}, ${c.date})`).join('; ')
   const social = socials.map((s) => `${s.label} ${s.handle}`).join(', ')
+  const work = experience
+    .map((e) => `- ${e.role} at ${e.company} (${e.period}): ${e.points.join(' ')}`)
+    .join('\n')
 
   return [
     `Name: ${profile.name}. Role: ${profile.roles[0]}.`,
     profile.bio,
-    `Education: ${education.school} — ${education.degree}, ${education.period} (${education.location}).`,
+    `Education: ${education.school} — ${education.degree}, ${education.period} (${education.location}); ${education.grades}.`,
+    `Experience:\n${work}`,
     `Skills — ${skills}.`,
     `Projects:\n${projs}`,
     `Achievement: ${achievement.title} at ${achievement.org} (${achievement.year}).`,
+    `Programs: ${programs.map((p) => `${p.title} (${p.org}, ${p.date})`).join('; ')}.`,
     `Certifications: ${certs}.`,
     `Contact: ${profile.email}; ${social}. ${profile.availability}.`,
   ].join('\n')
@@ -97,9 +103,14 @@ function findProject(q: string) {
 export function localAnswer(raw: string): string {
   const q = raw.toLowerCase().trim()
 
-  // Never expose grades / GPA — not shown on the site.
   if (/\b(g\.?p\.?a|cgpa|sgpa|grade|grades|marks?|percentage|cgp)\b/.test(q)) {
-    return 'I don’t share grades or GPA here — but I’m happy to tell you about my projects, skills, or experience.'
+    return `At ${education.school}: ${education.grades}.`
+  }
+
+  // Internships / work experience
+  if (/(experience|intern|internship|worked|company|job|quant singularity|magnivo|iit madras)/.test(q)) {
+    const lines = experience.map((e) => `${e.role} at ${e.company} (${e.period}) — ${e.points[0]}`)
+    return `My experience —\n${lines.join('\n')}`
   }
 
   // Greetings & small talk
@@ -141,12 +152,12 @@ export function localAnswer(raw: string): string {
 
   // Education
   if (/(education|study|studies|college|university|iiit|degree|cse|b\.?tech|academ|school)/.test(q)) {
-    return `${education.school} — ${education.degree}, ${education.period} (${education.location}).`
+    return `${education.school} — ${education.degree}, ${education.period} (${education.location}). ${education.grades}.`
   }
 
   // Achievement
-  if (/(achievement|hackathon|award|won|win|prize|recognition)/.test(q)) {
-    return `${achievement.title} at ${achievement.org} (${achievement.year}) — for building an AI-powered study assistant in a 72-hour timeframe.`
+  if (/(achievement|hackathon|award|won|win|prize|recognition|amazon|summer school)/.test(q)) {
+    return `${achievement.title} at ${achievement.org} (${achievement.year}) — for building an AI-powered study assistant in a 72-hour timeframe. Also: ${programs.map((p) => `${p.title} (${p.date})`).join('; ')}.`
   }
 
   // Certifications
@@ -169,10 +180,10 @@ export function localAnswer(raw: string): string {
   }
 
   // About / focus
-  if (/(about|who is|yourself|himself|background|introduce|tell me|focus|experience|fine.?tun|\bllm\b|\brag\b|computer vision|machine learning|\bai\b|\bml\b)/.test(q)) {
+  if (/(about|who is|yourself|himself|background|introduce|tell me|focus|fine.?tun|\bllm\b|\brag\b|computer vision|machine learning|\bai\b|\bml\b)/.test(q)) {
     return profile.bio
   }
 
   // Out of context → refuse
-  return 'I can only answer questions about Praneeth — his projects, skills, education, achievements, or how to reach him. Try asking about one of those!'
+  return 'I can only answer questions about Praneeth — his experience, projects, skills, education, achievements, or how to reach him. Try asking about one of those!'
 }

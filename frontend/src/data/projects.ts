@@ -53,12 +53,12 @@ export const projects: Project[] = [
     id: 'study-assistant-hub',
     title: 'Study Assistant Hub',
     tagline: 'An AI study companion — five tools built on your own lecture PDFs.',
-    kind: 'Full-Stack · RAG',
-    period: '2025',
+    kind: 'Agentic RAG',
+    period: 'Nov — Dec 2025',
     problem:
       'Students juggle scattered tools to study from their own material — and most need an API key per service.',
     approach:
-      'One FastAPI server + a hand-built “Liquid Glass” SPA. Local embeddings + FAISS power RAG over your PDFs; Groq handles all LLM inference — so a single GROQ_API_KEY runs everything.',
+      'A grounded agentic RAG pipeline — query rewriting, retrieval, grading, and correction loops built with LangChain and FAISS — served through FastAPI with Groq-hosted inference, handling PDF parsing, chunking, and embedding of unstructured lecture material.',
     outcome:
       'Rebuilt from a four-Streamlit-app prototype into a single SPA + API: one process, instant navigation, five tools — and a 1st-place hackathon win.',
     highlights: [
@@ -66,7 +66,7 @@ export const projects: Project[] = [
       'Quiz generator, active-recall flashcards, day-by-day study planner, and zoomable mind maps',
       'Three sources per tool — saved subject, free topic, or one-off PDF upload',
     ],
-    stack: ['FastAPI', 'Python', 'Groq', 'FAISS', 'RAG', 'React'],
+    stack: ['LangChain', 'Agentic RAG', 'FAISS', 'Groq', 'FastAPI', 'Python'],
     metrics: [
       { value: 5, label: 'AI Tools in One' },
       { value: 72, suffix: 'h', label: 'Hackathon Build' },
@@ -78,6 +78,63 @@ export const projects: Project[] = [
     },
     featured: true,
     award: '1st Place — IIIT Trichy Hackathon',
+  },
+  {
+    id: 'swizzo',
+    title: 'Swizzo',
+    tagline: 'An AI commerce concierge on Swiggy MCP — search, compare, and order by chat.',
+    kind: 'AI Agents · MCP',
+    period: 'Jul — Aug 2026',
+    problem:
+      'Shopping across restaurants and Instamart means hopping between screens to search, compare, apply coupons, and track orders.',
+    approach:
+      'A conversational concierge on Swiggy MCP and the Claude Agent SDK. The LLM handles reasoning and recommendations, while backend services own cart updates, coupons, and order placement — every order needs explicit user approval.',
+    outcome:
+      'Live product and restaurant search, cross-restaurant comparison, and order tracking in one streaming chat, with a safe agent boundary between “suggest” and “spend”.',
+    highlights: [
+      'Searches live products and restaurants, compares options, and tracks orders conversationally',
+      'Safe agent architecture: LLM reasons, backend controls cart, coupons, and checkout with user approval',
+      'Next.js frontend with streaming chat, live product cards, cross-restaurant search, and real-time cart sync',
+    ],
+    stack: ['Swiggy MCP', 'Claude Agent SDK', 'Next.js', 'TypeScript'],
+    links: {},
+    featured: true,
+  },
+  {
+    id: 'llm-finetune-sentiment',
+    title: 'LLM Fine-Tuning — Financial Sentiment',
+    tagline: 'Llama 3.2 (3B) turned into a strict financial-sentiment classifier with 4-bit QLoRA.',
+    kind: 'AI/ML · Fine-Tuning',
+    period: 'Feb — Mar 2026',
+    problem:
+      'A base LLM can’t reliably answer “Bearish, Bullish, or Neutral?” — zero-shot it produced an invalid answer for 1,998 of 2,388 tweets.',
+    approach:
+      'Instruction-tuned Meta Llama 3.2 3B with Unsloth + PEFT: frozen 4-bit NF4 base, LoRA (r=16) on all attention and MLP projections, loss only on the one-word answer. Benchmarked the same QLoRA run with and without Unsloth on a free Colab T4.',
+    outcome:
+      '91.71% accuracy and 0.896 macro-F1 on all 2,388 held-out tweets (vs 42% for 3-shot prompting), with zero invalid outputs — trained in 13.6 minutes.',
+    highlights: [
+      '91.71% accuracy after fine-tuning vs 42.04% 3-shot and 1.55% zero-shot on the same prompt',
+      'Unsloth: 1.84× faster steps and 42% less peak GPU memory than plain transformers + PEFT',
+      'Only 0.75% of parameters trained (24.3M LoRA params) under 4-bit quantization',
+    ],
+    stack: ['Llama 3.2', 'Unsloth', 'PEFT', 'QLoRA', 'PyTorch', 'Hugging Face'],
+    chart: {
+      kind: 'bars',
+      items: [
+        { label: 'Zero-shot', value: 1.55, suffix: '%' },
+        { label: '3-shot', value: 42.04, suffix: '%' },
+        { label: 'Fine-tuned', value: 91.71, suffix: '%' },
+      ],
+    },
+    metrics: [
+      { value: 91.71, decimals: 2, suffix: '%', label: 'Accuracy' },
+      { value: 1.84, decimals: 2, suffix: '×', label: 'Faster w/ Unsloth' },
+      { value: 42, prefix: '−', suffix: '%', label: 'Peak VRAM' },
+    ],
+    links: {
+      github: 'https://github.com/gpr-27/llm-financial-sentiment-unsloth',
+    },
+    featured: true,
   },
   {
     id: 'nifty-signal-pod',
@@ -140,7 +197,7 @@ export const projects: Project[] = [
     title: 'FDM 3D-Printing Defect Detection',
     tagline: 'CNN computer-vision models that catch print defects at 99%+ accuracy.',
     kind: 'AI/ML · Computer Vision',
-    period: '2026',
+    period: 'Jan — Feb 2026',
     problem:
       'FDM 3D prints fail in subtle, visually distinct ways (cracking, warping, stringing) that are slow to catch by eye.',
     approach:
@@ -150,6 +207,7 @@ export const projects: Project[] = [
     highlights: [
       'Binary defect detection and 5-class typing (Cracking, Layer Shifting, Off Platform, Stringing, Warping)',
       'Benchmarked AlexNet, ResNet18, and InceptionV3 with ImageNet transfer learning',
+      'Audited the split for near-duplicate time-lapse frames and added a session-grouped evaluation mode',
     ],
     stack: ['PyTorch', 'Computer Vision', 'Transfer Learning', 'CNN'],
     chart: {
@@ -159,9 +217,144 @@ export const projects: Project[] = [
         { label: 'Multi-class Accuracy', value: 99.22, suffix: '%' },
       ],
     },
-    metrics: [{ value: 5, label: 'Defect Classes' }],
-    links: {},
+    metrics: [
+      { value: 5, label: 'Defect Classes' },
+      { value: 3, label: 'CNN Backbones' },
+    ],
+    links: {
+      github: 'https://github.com/gpr-27/fdm-3d-printing-defect-detection',
+    },
     featured: true,
+  },
+
+  // ---------------- AGENTS & SYSTEMS ----------------
+  {
+    id: 'axon',
+    title: 'Axon',
+    tagline: 'A glass-box coding agent for your terminal — every call, token, and cent visible.',
+    kind: 'AI Agents · Dev Tools',
+    period: '2026',
+    highlights: [
+      'Numbered timeline shows every LLM call, tool run, cache hit, and cost per turn',
+      '15 provider presets incl. local Ollama / LM Studio, with fallback chains on 429 / 5xx',
+      'Claude Code compatible: CLAUDE.md, hooks, skills, MCP, subagents — plus a Python SDK and HTTP API',
+    ],
+    stack: ['Python', 'MCP', 'Anthropic / OpenAI APIs', 'Ollama', 'SSE', 'GitHub Actions'],
+    metrics: [
+      { value: 21, label: 'Built-in Tools' },
+      { value: 112, label: 'Slash Commands' },
+      { value: 15, label: 'Provider Presets' },
+    ],
+    links: {
+      github: 'https://github.com/gpr-27/axon',
+    },
+  },
+  {
+    id: 'chaukhat',
+    title: 'Chaukhat',
+    tagline: 'A Razorpay reference merchant where AI agents spend only what humans authorise.',
+    kind: 'AI Agents · Commerce',
+    period: '2026',
+    highlights: [
+      'Implements the ACP checkout API and ES256-signed AP2 mandates on Razorpay test mode',
+      '19-step deterministic, LLM-free gate verifies every mandate before an order can exist',
+      'Hash-chained signed ledger, MCP tool binding, and conformance + attack suites — built for the Razorpay AI Buildathon 2026',
+    ],
+    stack: ['Python', 'MCP', 'Razorpay', 'AP2 / ACP', 'Docker', 'pytest'],
+    metrics: [
+      { value: 12, suffix: '/12', label: 'ACP Conformance' },
+      { value: 16, label: 'Attacks Blocked' },
+    ],
+    links: {
+      github: 'https://github.com/gpr-27/chaukhat',
+    },
+  },
+  {
+    id: 'envoy',
+    title: 'Envoy — Agentic Dating',
+    tagline: 'AI agents read your profile, go on dates for you, and rank who fits best.',
+    kind: 'AI Agents · Full-Stack',
+    period: '2026',
+    highlights: [
+      'Reader agent builds evidence-cited profiles from public LinkedIn and Instagram',
+      'Isolated date agents converse turn-by-turn, then privately debrief and rank matches',
+      'Resumable tick-based pipeline beats serverless time limits; multi-provider LLM router',
+    ],
+    stack: ['Next.js', 'TypeScript', 'Supabase', 'Apify', 'Gemini', 'Groq', 'Zod'],
+    links: {
+      github: 'https://github.com/gpr-27/envoy-agentic-dating',
+      demo: 'https://envoy-agentic-dating.vercel.app',
+    },
+  },
+  {
+    id: 'redrob',
+    title: 'Redrob Candidate Ranker',
+    tagline: 'Picks the top 100 from 100,000 candidates — and catches the honeypots.',
+    kind: 'AI/ML · Ranking',
+    period: '2026',
+    highlights: [
+      'Seven weighted scoring dimensions encode the JD rubric instead of keyword matching',
+      'Multi-signal honeypot detector catches impossible profiles (e.g. tenure before a company existed)',
+      'Fact-only reasoning per candidate; pure-stdlib Python, ranks 100K profiles in ~10 s on CPU',
+    ],
+    stack: ['Python', 'Streamlit', 'Hugging Face Spaces'],
+    metrics: [
+      { value: 100, suffix: 'K', label: 'Profiles Ranked' },
+      { value: 10, prefix: '~', suffix: 's', label: 'On CPU' },
+    ],
+    links: {
+      github: 'https://github.com/gpr-27/redrob-candidate-ranking',
+      demo: 'https://huggingface.co/spaces/praneethg27/redrob-ranker',
+    },
+  },
+  {
+    id: 'legixo-qa',
+    title: 'Legixo — Legal Q&A',
+    tagline: 'Grounded Q&A over legal documents that cites its chunks — or abstains.',
+    kind: 'AI/ML · Agentic RAG',
+    period: '2026',
+    highlights: [
+      'LangGraph loop: expand → retrieve → grade → generate / refine / give up, with bounded retries',
+      'Every answer cites exact source chunks, and says so when the documents lack the answer',
+      'Gold-set evaluation checks both citation accuracy and abstain correctness',
+    ],
+    stack: ['LangGraph', 'Pinecone', 'FastAPI', 'Groq', 'Gemini Embeddings'],
+    links: {
+      github: 'https://github.com/gpr-27/legixo-qa',
+    },
+  },
+  {
+    id: 'attendly',
+    title: 'Attendly',
+    tagline: 'A personal AI attendance co-pilot — mark classes, track bunk %, plan skips.',
+    kind: 'Full-Stack · AI',
+    period: '2026',
+    highlights: [
+      'Installable PWA with an offline Dexie cache and Supabase as the source of truth',
+      'Gemini parses timetable photos; a Groq-powered coach gives attendance insights',
+      'Clerk auth, cross-device sync, and PDF attendance export',
+    ],
+    stack: ['Next.js', 'TypeScript', 'Supabase', 'Clerk', 'Dexie', 'Groq', 'Gemini'],
+    links: {
+      github: 'https://github.com/gpr-27/attendly',
+      demo: 'https://attendly-navy.vercel.app',
+    },
+  },
+  {
+    id: 'iiitt-confessions',
+    title: 'IIIT Trichy Confessions',
+    tagline: 'A live anonymous campus platform with real-time chat and push notifications.',
+    kind: 'Full-Stack',
+    period: '2026',
+    highlights: [
+      'In production with real campus users; additive, backward-compatible API releases',
+      'Socket.IO real-time chat, web push, profanity filtering, and per-IP rate limiting',
+      'Next.js frontend on Vercel with an Express 5 + MongoDB API on Render',
+    ],
+    stack: ['Next.js', 'React 19', 'Express 5', 'Socket.IO', 'MongoDB', 'Playwright'],
+    links: {
+      demo: 'https://iiitt-confessions.vercel.app',
+    },
   },
 
   // ---------------- GRID ----------------
@@ -232,24 +425,6 @@ export const projects: Project[] = [
       github: 'https://github.com/gpr-27/pramaan',
       demo: 'https://et-nucleus.onrender.com',
     },
-  },
-  {
-    id: 'llm-finetune-sentiment',
-    title: 'LLM Fine-Tuning — Financial Sentiment',
-    tagline: 'Instruction-tuned Llama 3.2 (3B) for strict sentiment classification.',
-    kind: 'AI/ML · Fine-Tuning',
-    period: '2026',
-    highlights: [
-      'PEFT + instruction-tuning with QLoRA on a Twitter financial dataset',
-      'Fine-tuned Meta’s Llama 3.2 (3B) base model via Unsloth',
-      '4-bit quantization + Unsloth kernels to slash GPU memory and speed up training',
-    ],
-    stack: ['PyTorch', 'Unsloth', 'PEFT', 'QLoRA'],
-    metrics: [
-      { value: 3, suffix: 'B', label: 'Llama Params' },
-      { value: 4, suffix: '-bit', label: 'Quantization' },
-    ],
-    links: {},
   },
   {
     id: 'sms-spam',

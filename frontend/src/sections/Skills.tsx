@@ -8,7 +8,7 @@ export function Skills() {
       <div className="container">
         <SectionHeading
           eyebrow="Toolkit"
-          index="§ 02"
+          index="§ 03"
           title={
             <>
               Skills &amp; <span className="coral">technologies</span>

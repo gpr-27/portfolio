@@ -8,13 +8,13 @@ export function Work() {
       <div className="container">
         <SectionHeading
           eyebrow="Selected work"
-          index="§ 01"
+          index="§ 02"
           title={
             <>
               Things I&rsquo;ve <span className="coral">built</span>
             </>
           }
-          description="Fine-tuned models, RAG systems, computer-vision pipelines, and full-stack AI apps — most with live demos and source. Open any entry to read the full case study."
+          description="AI agents, fine-tuned models, RAG systems, computer-vision pipelines, and full-stack AI apps — every one linked to its source on GitHub. Open any entry to read the full case study."
         />
 
         <div className="index" role="list">

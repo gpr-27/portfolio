@@ -7,6 +7,7 @@ import { ScrollProgress } from './components/ScrollProgress'
 import { CursorDot } from './components/CursorDot'
 import { ChatAssistant } from './components/ChatAssistant'
 import { Masthead } from './sections/Masthead'
+import { Experience } from './sections/Experience'
 import { Work } from './sections/Work'
 import { Skills } from './sections/Skills'
 import { About } from './sections/About'
@@ -48,6 +49,7 @@ export default function App() {
 
       <main>
         <Masthead />
+        <Experience />
         <Work />
         <Skills />
         <About />
