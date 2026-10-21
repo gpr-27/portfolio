@@ -1201,6 +1201,14 @@ body.has-cursor textarea {
   border-bottom-left-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
+.bubble__model {
+  display: block;
+  margin-top: 0.55rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--muted-soft);
+}
 .bubble--user {
   align-self: flex-end;
   background: var(--primary);

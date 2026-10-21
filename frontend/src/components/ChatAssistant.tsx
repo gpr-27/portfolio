@@ -7,6 +7,8 @@ import { buildKnowledge, CHAT_ENDPOINT, GREETING, localAnswer, SUGGESTIONS } fro
 interface Msg {
   role: 'assistant' | 'user'
   content: string
+  // Model that generated this reply (assistant messages from the live API only).
+  model?: string
 }
 
 function newSessionId() {
@@ -47,7 +49,8 @@ export function ChatAssistant() {
         if (!res.ok) throw new Error('bad response')
         const data = await res.json()
         const reply = data.reply ?? data.answer ?? ''
-        setMessages((m) => [...m, { role: 'assistant', content: reply || '…' }])
+        const model = typeof data.model === 'string' && data.model ? data.model : undefined
+        setMessages((m) => [...m, { role: 'assistant', content: reply || '…', model }])
       } else {
         // Offline, on-page-only fallback with a natural beat.
         const last = history[history.length - 1]?.content ?? ''
@@ -142,6 +145,7 @@ export function ChatAssistant() {
               {messages.map((m, i) => (
                 <div key={i} className={`bubble bubble--${m.role}`}>
                   <FormattedMessage content={m.content} />
+                  {m.model && <span className="bubble__model">{m.model}</span>}
                 </div>
               ))}
               {busy && (
