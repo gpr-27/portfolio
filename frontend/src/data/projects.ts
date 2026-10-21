@@ -222,23 +222,6 @@ export const projects: Project[] = [
     metrics: [{ value: 6, label: 'Models Benchmarked' }],
     links: {},
   },
-  {
-    id: 'portfolio',
-    title: 'This Portfolio',
-    tagline: 'The site you’re on, with an assistant that answers as me from my real record.',
-    kind: 'Full-Stack · AI',
-    period: '2026',
-    highlights: [
-      'Every section renders from one typed data source that the assistant is also grounded in',
-      'Claude answers first, with two Groq keys and two Gemini keys as ordered fallbacks',
-      'Vite frontend and Express backend shipped together as Vercel Services, with MongoDB logging',
-    ],
-    stack: ['React', 'TypeScript', 'Express', 'Claude API', 'Vercel', 'MongoDB'],
-    links: {
-      github: 'https://github.com/gpr-27/portfolio',
-      demo: 'https://portfolio-black-six-34.vercel.app',
-    },
-  },
 ]
 
 export const featuredProjects = projects.filter((p) => p.featured)
