@@ -88,7 +88,7 @@ export const socials: SocialLink[] = [
 export const education = {
   school: 'IIIT Tiruchirapalli',
   degree: 'B.Tech, Computer Science & Engineering',
-  period: '2023 — 2027',
+  period: '2023 – 2027',
   location: 'Trichy, Tamil Nadu',
   grades: 'CGPA 8.96 / 10 · Semester 5 GPA 9.38 / 10',
 }
@@ -97,7 +97,7 @@ export const experience: Experience[] = [
   {
     company: 'Quant Singularity',
     role: 'AI/ML Intern',
-    period: 'Jun 2026 — Present',
+    period: 'Jun 2026 – Present',
     focus: 'Quant ML',
     points: [
       'Built a production forecast aggregation layer for multi-strategy trading signals using weighted ensemble voting, conflict resolution, and regime-aware routing.',
@@ -109,7 +109,7 @@ export const experience: Experience[] = [
   {
     company: 'Magnivo AI',
     role: 'Agentic AI Intern',
-    period: 'May 2026 — Jun 2026',
+    period: 'May 2026 – Jun 2026',
     focus: 'Multi-Agent Systems',
     points: [
       'Shipped a production multi-agent GTM automation platform built on specialized LLM agents for lead discovery, enrichment, personalized outreach, and campaign execution.',
@@ -122,7 +122,7 @@ export const experience: Experience[] = [
   {
     company: 'IIT Madras',
     role: 'Research Intern',
-    period: 'Jan 2026 — Apr 2026',
+    period: 'Jan 2026 – Apr 2026',
     focus: 'Surface Metrology',
     points: [
       'Researched additive-manufactured surface metrology, evaluating nonlinear least-squares mean-line fitting and morphological filtering for surface roughness characterization.',
@@ -223,7 +223,7 @@ export const coursework = {
 }
 
 export const achievement = {
-  title: '1st Place — Hackathon',
+  title: '1st Place, Hackathon',
   org: 'IIIT Tiruchirapalli',
   year: '2025',
   points: [
@@ -235,7 +235,7 @@ export const programs = [
   {
     title: 'Amazon ML Summer School 2026',
     org: 'Amazon',
-    date: 'Jul 2026 — Aug 2026',
+    date: 'Jul 2026 – Aug 2026',
     note: 'Integrated learning program on core machine learning concepts and their real-world applications.',
   },
 ]
@@ -254,6 +254,15 @@ export const certifications: Certification[] = [
     href: 'https://www.coursera.org/account/accomplishments/verify/XXWA74WABWKV',
   },
 ]
+
+/** The About letter, in the first person. Shown on the page and given to the assistant. */
+export const letter = {
+  opening:
+    'I’m Praneeth, a computer science student at IIIT Tiruchirappalli (B.Tech, 2023–2027). I hold a CGPA of 8.96 and scored 9.38 in my fifth semester.',
+  closing:
+    'I’m looking for internships and research collaborations in applied AI. If you’re building with models, I would like to hear from you.',
+  signoff: 'AI/ML engineer, Tiruchirappalli',
+}
 
 /** Contact form posts here → Vercel function → MongoDB (`contact_messages`). */
 export const CONTACT_ENDPOINT =

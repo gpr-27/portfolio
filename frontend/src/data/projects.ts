@@ -52,39 +52,39 @@ export const projects: Project[] = [
   {
     id: 'study-assistant-hub',
     title: 'Study Assistant Hub',
-    tagline: 'An AI study companion — five tools built on your own lecture PDFs.',
+    tagline: 'An AI study companion: five tools built on your own lecture PDFs.',
     kind: 'Agentic RAG',
-    period: 'Nov — Dec 2025',
+    period: 'Nov – Dec 2025',
     problem:
-      'Students juggle scattered tools to study from their own material — and most need an API key per service.',
+      'Students juggle scattered tools to study from their own material, and most need an API key per service.',
     approach:
-      'A grounded agentic RAG pipeline — query rewriting, retrieval, grading, and correction loops built with LangChain and FAISS — served through FastAPI with Groq-hosted inference, handling PDF parsing, chunking, and embedding of unstructured lecture material.',
+      'A grounded agentic RAG pipeline (query rewriting, retrieval, grading, and correction loops built with LangChain and FAISS), served through FastAPI with Groq-hosted inference, handling PDF parsing, chunking, and embedding of unstructured lecture material.',
     outcome:
-      'Rebuilt from a four-Streamlit-app prototype into a single SPA + API: one process, instant navigation, five tools — and a 1st-place hackathon win.',
+      'Rebuilt from a four-Streamlit-app prototype into a single SPA + API: one process, instant navigation, five tools, and a 1st-place hackathon win.',
     highlights: [
       'Chat with RAG (local embeddings + FAISS) grounded in your PDFs, with short-term memory',
       'Quiz generator, active-recall flashcards, day-by-day study planner, and zoomable mind maps',
-      'Three sources per tool — saved subject, free topic, or one-off PDF upload',
+      'Three sources per tool: saved subject, free topic, or one-off PDF upload',
     ],
     stack: ['LangChain', 'Agentic RAG', 'FAISS', 'Groq', 'FastAPI', 'Python'],
     metrics: [
       { value: 5, label: 'AI Tools in One' },
       { value: 72, suffix: 'h', label: 'Hackathon Build' },
-      { value: 1, prefix: '#', label: 'Place — IIIT Trichy' },
+      { value: 1, prefix: '#', label: 'Place, IIIT Trichy' },
     ],
     links: {
       github: 'https://github.com/gpr-27/study-assistant-hub',
       demo: 'https://study-assistant-hub.onrender.com',
     },
     featured: true,
-    award: '1st Place — IIIT Trichy Hackathon',
+    award: '1st Place, IIIT Trichy Hackathon',
   },
   {
     id: 'swizzo',
     title: 'Swizzo',
-    tagline: 'An AI commerce concierge on Swiggy MCP — search, compare, and order by chat.',
+    tagline: 'An AI commerce concierge on Swiggy MCP: search, compare, and order by chat.',
     kind: 'AI Agents · MCP',
-    period: 'Jul — Aug 2026',
+    period: 'Jul – Aug 2026',
     problem:
       'Shopping across restaurants and Instamart means hopping between screens to search, compare, apply coupons, and track orders.',
     approach:
@@ -102,16 +102,16 @@ export const projects: Project[] = [
   },
   {
     id: 'llm-finetune-sentiment',
-    title: 'LLM Fine-Tuning — Financial Sentiment',
+    title: 'LLM Fine-Tuning for Financial Sentiment',
     tagline: 'Llama 3.2 (3B) turned into a strict financial-sentiment classifier with 4-bit QLoRA.',
     kind: 'AI/ML · Fine-Tuning',
-    period: 'Feb — Mar 2026',
+    period: 'Feb – Mar 2026',
     problem:
-      'A base LLM can’t reliably answer “Bearish, Bullish, or Neutral?” — zero-shot it produced an invalid answer for 1,998 of 2,388 tweets.',
+      'A base LLM can’t reliably answer “Bearish, Bullish, or Neutral?” Zero-shot, it produced an invalid answer for 1,998 of 2,388 tweets.',
     approach:
       'Instruction-tuned Meta Llama 3.2 3B with Unsloth + PEFT: frozen 4-bit NF4 base, LoRA (r=16) on all attention and MLP projections, loss only on the one-word answer. Benchmarked the same QLoRA run with and without Unsloth on a free Colab T4.',
     outcome:
-      '91.71% accuracy and 0.896 macro-F1 on all 2,388 held-out tweets (vs 42% for 3-shot prompting), with zero invalid outputs — trained in 13.6 minutes.',
+      '91.71% accuracy and 0.896 macro-F1 on all 2,388 held-out tweets (vs 42% for 3-shot prompting), with zero invalid outputs, trained in 13.6 minutes.',
     highlights: [
       '91.71% accuracy after fine-tuning vs 42.04% 3-shot and 1.55% zero-shot on the same prompt',
       'Unsloth: 1.84× faster steps and 42% less peak GPU memory than plain transformers + PEFT',
@@ -137,43 +137,15 @@ export const projects: Project[] = [
     featured: true,
   },
   {
-    id: 'kairos-ai',
-    title: 'Kairos AI',
-    tagline: 'A Socratic AI tutor for DSA, competitive programming & system design.',
-    kind: 'Full-Stack · AI',
-    period: '2026',
-    problem:
-      'Most coding helpers just hand over the answer — which is the opposite of how you actually learn to problem-solve.',
-    approach:
-      'A coding platform with an interactive playground, a problem bank, and an LLM “AI Coach” that guides Socratically. One Docker container: Node/Express serves the SPA + REST + playground WebSocket and proxies /ml to a co-located Python service — all same-origin.',
-    outcome:
-      'A single-deploy, same-origin architecture running entirely on Groq (Llama 3.3 70B), with live in-browser code execution via Piston.',
-    highlights: [
-      'AI Coach guides Socratically instead of revealing solutions',
-      'Live playground with WebSocket-driven code execution (Piston)',
-      'Single-container design: Node serves SPA + API and proxies the Python ML service',
-    ],
-    stack: ['React', 'Node/Express', 'Python', 'Groq', 'MongoDB', 'WebSocket', 'Docker'],
-    metrics: [
-      { value: 70, suffix: 'B', label: 'Llama 3.3 Model' },
-      { value: 1, label: 'Container, 0 CORS' },
-    ],
-    links: {
-      github: 'https://github.com/gpr-27/kairos-ai',
-      demo: 'https://kairos-ai-zoxs.onrender.com',
-    },
-    featured: true,
-  },
-  {
     id: 'fdm-defect',
     title: 'FDM 3D-Printing Defect Detection',
     tagline: 'CNN computer-vision models that catch print defects at 99%+ accuracy.',
     kind: 'AI/ML · Computer Vision',
-    period: 'Jan — Feb 2026',
+    period: 'Jan – Feb 2026',
     problem:
       'FDM 3D prints fail in subtle, visually distinct ways (cracking, warping, stringing) that are slow to catch by eye.',
     approach:
-      'Built CNN classifiers for two tasks — binary defect detection and 5-class defect typing — benchmarking AlexNet, ResNet18, and InceptionV3 with ImageNet transfer learning.',
+      'Built CNN classifiers for two tasks, binary defect detection and 5-class defect typing, benchmarking AlexNet, ResNet18, and InceptionV3 with ImageNet transfer learning.',
     outcome:
       'Near-perfect accuracy on both tasks, identifying the strongest transfer-learning backbone for each.',
     highlights: [
@@ -199,17 +171,16 @@ export const projects: Project[] = [
     featured: true,
   },
 
-  // ---------------- AGENTS & SYSTEMS ----------------
   {
     id: 'axon',
     title: 'Axon',
-    tagline: 'A glass-box coding agent for your terminal — every call, token, and cent visible.',
+    tagline: 'A glass-box coding agent for your terminal: every call, token, and cent visible.',
     kind: 'AI Agents · Dev Tools',
     period: '2026',
     highlights: [
       'Numbered timeline shows every LLM call, tool run, cache hit, and cost per turn',
       '15 provider presets incl. local Ollama / LM Studio, with fallback chains on 429 / 5xx',
-      'Claude Code compatible: CLAUDE.md, hooks, skills, MCP, subagents — plus a Python SDK and HTTP API',
+      'Claude Code compatible: CLAUDE.md, hooks, skills, MCP, subagents, plus a Python SDK and HTTP API',
     ],
     stack: ['Python', 'MCP', 'Anthropic / OpenAI APIs', 'Ollama', 'SSE', 'GitHub Actions'],
     metrics: [
@@ -221,113 +192,8 @@ export const projects: Project[] = [
       github: 'https://github.com/gpr-27/axon',
     },
   },
-  {
-    id: 'chaukhat',
-    title: 'Chaukhat',
-    tagline: 'A Razorpay reference merchant where AI agents spend only what humans authorise.',
-    kind: 'AI Agents · Commerce',
-    period: '2026',
-    highlights: [
-      'Implements the ACP checkout API and ES256-signed AP2 mandates on Razorpay test mode',
-      '19-step deterministic, LLM-free gate verifies every mandate before an order can exist',
-      'Hash-chained signed ledger, MCP tool binding, and conformance + attack suites — built for the Razorpay AI Buildathon 2026',
-    ],
-    stack: ['Python', 'MCP', 'Razorpay', 'AP2 / ACP', 'Docker', 'pytest'],
-    metrics: [
-      { value: 12, suffix: '/12', label: 'ACP Conformance' },
-      { value: 16, label: 'Attacks Blocked' },
-    ],
-    links: {
-      github: 'https://github.com/gpr-27/chaukhat',
-    },
-  },
-  {
-    id: 'envoy',
-    title: 'Envoy — Agentic Dating',
-    tagline: 'AI agents read your profile, go on dates for you, and rank who fits best.',
-    kind: 'AI Agents · Full-Stack',
-    period: '2026',
-    highlights: [
-      'Reader agent builds evidence-cited profiles from public LinkedIn and Instagram',
-      'Isolated date agents converse turn-by-turn, then privately debrief and rank matches',
-      'Resumable tick-based pipeline beats serverless time limits; multi-provider LLM router',
-    ],
-    stack: ['Next.js', 'TypeScript', 'Supabase', 'Apify', 'Gemini', 'Groq', 'Zod'],
-    links: {
-      github: 'https://github.com/gpr-27/envoy-agentic-dating',
-      demo: 'https://envoy-agentic-dating.vercel.app',
-    },
-  },
 
-  // ---------------- GRID ----------------
-  {
-    id: 'aura-wellness',
-    title: 'Aura — Mental Wellness',
-    tagline: 'A full-stack wellness companion with empathetic AI.',
-    kind: 'Full-Stack · AI',
-    period: '2026',
-    highlights: [
-      'Mood tracking with AI-generated reflections and trend charts',
-      'Empathetic AI chat with therapy / meditation / crisis modes (Groq)',
-      'Mindful studio, medication reminders, and a smart health record',
-    ],
-    stack: ['React 19', 'Vite', 'Express', 'MongoDB', 'Groq', 'Recharts'],
-    links: {
-      github: 'https://github.com/gpr-27/Hackhub',
-      demo: 'https://aura-sqdv.onrender.com',
-    },
-  },
-  {
-    id: 'groqbot',
-    title: 'Groqbot',
-    tagline: 'A lightning-fast MERN AI chat on Groq’s LPU.',
-    kind: 'Full-Stack · AI',
-    period: '2026',
-    highlights: [
-      'Token-by-token streaming over SSE',
-      'Switch between Llama 3.3 70B, 3.1 8B, GPT-OSS 120B & Gemma 2 9B on the fly',
-      'Rich markdown, syntax highlighting, conversation management, regenerate / stop',
-    ],
-    stack: ['React 19', 'Node/Express', 'MongoDB', 'Groq', 'Clerk', 'SSE'],
-    links: {
-      github: 'https://github.com/gpr-27/chatbot',
-      demo: 'https://groqbot-coqy.onrender.com',
-    },
-  },
-  {
-    id: 'chatty',
-    title: 'Chatty — Realtime Chat',
-    tagline: 'MERN realtime messaging with WebRTC audio/video calls.',
-    kind: 'Full-Stack',
-    period: '2026',
-    highlights: [
-      'Live 1:1 messaging, typing indicators, read receipts & unread counts',
-      'Peer-to-peer audio/video calls over WebRTC',
-      'Image sharing (Cloudinary), online presence, light/dark glass UI',
-    ],
-    stack: ['Node', 'Socket.IO', 'MongoDB', 'React', 'Zustand', 'WebRTC'],
-    links: {
-      github: 'https://github.com/gpr-27/chat_app',
-      demo: 'https://chat-app-3i3p.onrender.com',
-    },
-  },
-  {
-    id: 'et-nucleus',
-    title: 'ET Nucleus — Persona-Aware News',
-    tagline: 'Business news that rewrites itself for who you are.',
-    kind: 'Full-Stack · AI',
-    period: '2026',
-    highlights: [
-      'Adaptive persona quiz + AI intent analysis classify your investor type & knowledge level',
-      'Deep-dive synthesis: one coherent briefing built from multiple articles, written for your level',
-      'Personalized feed — headlines rewritten for you, each with a /10 relevance score',
-    ],
-    stack: ['React', 'Vite', 'Express', 'Groq', 'Tailwind', 'Framer Motion'],
-    links: {
-      github: 'https://github.com/gpr-27/pramaan',
-      demo: 'https://et-nucleus.onrender.com',
-    },
-  },
+  // ---------------- MORE ----------------
   {
     id: 'sms-spam',
     title: 'SMS Spam Detection',
@@ -359,15 +225,15 @@ export const projects: Project[] = [
   {
     id: 'portfolio',
     title: 'This Portfolio',
-    tagline: 'The site you’re on — with a grounded AI assistant that answers as me.',
+    tagline: 'The site you’re on, with an assistant that answers as me from my real record.',
     kind: 'Full-Stack · AI',
     period: '2026',
     highlights: [
-      'Every section is rendered from one typed data source shared with the chat assistant',
-      'AI assistant grounded only in on-page facts, served from a Vercel Python function',
-      'Light / dark themes, smooth scroll, and a contact form backed by MongoDB',
+      'Every section renders from one typed data source that the assistant is also grounded in',
+      'Claude answers first, with two Groq keys and two Gemini keys as ordered fallbacks',
+      'Vite frontend and Express backend shipped together as Vercel Services, with MongoDB logging',
     ],
-    stack: ['React', 'TypeScript', 'Vite', 'Python', 'Vercel', 'MongoDB'],
+    stack: ['React', 'TypeScript', 'Express', 'Claude API', 'Vercel', 'MongoDB'],
     links: {
       github: 'https://github.com/gpr-27/portfolio',
       demo: 'https://portfolio-black-six-34.vercel.app',

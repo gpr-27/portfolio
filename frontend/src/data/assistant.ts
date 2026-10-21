@@ -1,28 +1,25 @@
 /* ============================================================
    AI ASSISTANT — grounded ONLY in what's on this site.
-   - CHAT_ENDPOINT: API endpoint backed by Groq (GPT-OSS 120B / 20B, Qwen 3.8 27B).
+   - CHAT_ENDPOINT: API endpoint backed by Claude, with Groq and Gemini fallbacks.
    - Until then, localAnswer() is a smart offline fallback built from
      the same on-page data. It speaks in first person (as Praneeth),
      answers greetings + "what can you do", and REFUSES anything
      off-topic.
    ============================================================ */
 
-import { achievement, certifications, education, experience, profile, programs, skillGroups, socials } from './resume'
+import {
+  achievement,
+  certifications,
+  coursework,
+  education,
+  experience,
+  letter,
+  profile,
+  programs,
+  skillGroups,
+  socials,
+} from './resume'
 import { projects } from './projects'
-
-export interface ModelOption {
-  id: string
-  name: string
-  tag: string
-}
-
-export const AI_MODELS: ModelOption[] = [
-  { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', tag: 'Smart' },
-  { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B', tag: 'Balanced' },
-  { id: 'qwen/qwen3.8-27b', name: 'Qwen 3.8 27B', tag: 'Fastest' },
-]
-
-export const DEFAULT_MODEL_ID = 'openai/gpt-oss-120b'
 
 /**
  * Backend API path. Defaults to the same-origin `/api/chat`
@@ -35,58 +32,75 @@ export const CHAT_ENDPOINT =
   (import.meta.env.VITE_CHAT_ENDPOINT as string | undefined) ?? '/api/chat'
 
 export const GREETING =
-  'Hey, thanks for visiting! 👋 I’m Praneeth’s assistant — ask me about his experience, projects, skills, education, or how to get in touch.'
+  'Hey, thanks for visiting! I answer as Praneeth, from everything on this page. Ask me about my internships, projects, skills, education, or how to reach me.'
 
 export const SUGGESTIONS = [
-  'Where has he interned?',
-  'What has he built?',
-  'His AI/ML skills',
-  'Education',
-  'How can I reach him?',
+  'Where have you interned?',
+  'What have you built?',
+  'Which AI/ML tools do you use?',
+  'Tell me about your education',
+  'How can I reach you?',
 ]
 
 const list = (arr: string[]) => arr.join(', ')
 
 /**
  * Compiles a fact sheet from the SAME data that renders the site
- * (resume.ts + projects.ts) — the single source of truth. Sent to the
- * backend so the model is grounded without duplicating any facts here.
+ * (resume.ts + projects.ts), so the assistant knows everything the page
+ * shows and nothing else. Sent to the backend with every question.
  */
 export function buildKnowledge(): string {
-  const skills = skillGroups.map((g) => `${g.label}: ${list(g.items)}`).join('; ')
   const projs = projects
     .map((p) => {
       const links = [
-        p.links.demo && `demo ${p.links.demo}`,
-        p.links.github && `code ${p.links.github}`,
-        p.links.kaggle && `kaggle ${p.links.kaggle}`,
+        p.links.demo && `live demo ${p.links.demo}`,
+        p.links.github && `source ${p.links.github}`,
+        p.links.kaggle && `Kaggle ${p.links.kaggle}`,
+      ].filter(Boolean)
+      const metrics = p.metrics?.map((m) => `${m.prefix ?? ''}${m.value}${m.suffix ?? ''} ${m.label}`) ?? []
+      const chart = p.chart?.items.map((c) => `${c.label} ${c.value}${c.suffix ?? ''}`) ?? []
+      return [
+        `### ${p.title} (${p.kind}, ${p.period})${p.featured ? ' [featured]' : ''}`,
+        p.tagline,
+        p.award && `Award: ${p.award}.`,
+        p.problem && `Problem: ${p.problem}`,
+        p.approach && `Approach: ${p.approach}`,
+        p.outcome && `Outcome: ${p.outcome}`,
+        `Highlights: ${p.highlights.join('; ')}.`,
+        metrics.length > 0 && `Figures: ${list(metrics)}.`,
+        chart.length > 0 && `Results: ${list(chart)}.`,
+        `Built with: ${list(p.stack)}.`,
+        links.length > 0 && `Links: ${list(links as string[])}.`,
       ]
         .filter(Boolean)
-        .join(', ')
-      const metrics = p.metrics?.length
-        ? ` [${p.metrics.map((m) => `${m.prefix ?? ''}${m.value}${m.suffix ?? ''} ${m.label}`).join(', ')}]`
-        : ''
-      return `- ${p.title} (${p.kind}, ${p.period}): ${p.tagline}${p.outcome ? ` ${p.outcome}` : ''}${metrics}${links ? ` — ${links}` : ''}`
+        .join('\n')
     })
-    .join('\n')
-  const certs = certifications.map((c) => `${c.title} (${c.issuer}, ${c.date})`).join('; ')
-  const social = socials.map((s) => `${s.label} ${s.handle}`).join(', ')
+    .join('\n\n')
+
   const work = experience
-    .map((e) => `- ${e.role} at ${e.company} (${e.period}): ${e.points.join(' ')}`)
-    .join('\n')
+    .map((e) => `### ${e.role} at ${e.company} (${e.period}, focus: ${e.focus})\n${e.points.map((p) => `- ${p}`).join('\n')}\nWorked with: ${list(e.stack)}.`)
+    .join('\n\n')
+
+  const courses = Object.entries(coursework)
+    .map(([group, items]) => `${group}: ${list(items)}`)
+    .join('; ')
 
   return [
-    `Name: ${profile.name}. Role: ${profile.roles[0]}.`,
+    `# ${profile.name}`,
+    `Roles: ${list(profile.roles)}. ${profile.availability}.`,
     profile.bio,
-    `Education: ${education.school} — ${education.degree}, ${education.period} (${education.location}); ${education.grades}.`,
-    `Experience:\n${work}`,
-    `Skills — ${skills}.`,
-    `Projects:\n${projs}`,
-    `Achievement: ${achievement.title} at ${achievement.org} (${achievement.year}).`,
-    `Programs: ${programs.map((p) => `${p.title} (${p.org}, ${p.date})`).join('; ')}.`,
-    `Certifications: ${certs}.`,
-    `Contact: ${profile.email}; ${social}. ${profile.availability}.`,
-  ].join('\n')
+    letter.opening,
+    letter.closing,
+    `## Education\n${education.school}, ${education.degree}, ${education.period} (${education.location}). ${education.grades}.\nCoursework: ${courses}.`,
+    `## Experience\n${work}`,
+    `## Projects (${projects.length})\n${projs}`,
+    `## Headline results on the site\n91.71% accuracy after fine-tuning Llama 3.2 3B on financial tweets (vs 42% with 3-shot prompting); 99.45% binary accuracy catching FDM 3D-print defects with CNNs.`,
+    `## Skills\n${skillGroups.map((g) => `${g.label}: ${list(g.items)}`).join('\n')}`,
+    `## Achievements\n${achievement.title} at ${achievement.org} (${achievement.year}): ${achievement.points.join(' ')}`,
+    `## Programs\n${programs.map((p) => `${p.title} (${p.org}, ${p.date}): ${p.note}`).join('\n')}`,
+    `## Certifications\n${certifications.map((c) => `${c.title} (${c.issuer}, ${c.date}) ${c.href}`).join('\n')}`,
+    `## Contact\nEmail ${profile.email}. ${socials.map((s) => `${s.label}: ${s.handle} (${s.href})`).join('. ')}. Résumé PDF: /resume.pdf. There is also a contact form at the bottom of the page.`,
+  ].join('\n\n')
 }
 
 function findProject(q: string) {
@@ -116,7 +130,7 @@ export function localAnswer(raw: string): string {
     /\b(hi+|hey+|hello+|yo|namaste|hi+ya|heya|howdy|hru|sup)\b/.test(q) ||
     /(how (are|r|'?re) (you|u|ya|things)|how'?s (it going|life|things|everything)|good (morning|evening|afternoon|day)|what'?s up|wh?[au]ss?up|you good|nice to meet|thank)/.test(q)
   ) {
-    return 'Hey! 👋 Doing great, thanks for asking. I can tell you about my projects, skills, education, achievements, or how to get in touch — what would you like to know?'
+    return 'Hey! Doing great, thanks for asking. I can tell you about my projects, skills, education, achievements, or how to get in touch — what would you like to know?'
   }
 
   // Capabilities
