@@ -12,9 +12,9 @@ import Anthropic from '@anthropic-ai/sdk'
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 
-const CLAUDE_MODELS = ['claude-opus-5-5']
-const GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b']
-const GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-flash-latest']
+const CLAUDE_MODELS = ['claude-sonnet-5-5']
+const GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b']
+const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.1-flash-lite']
 
 // Per-call cap, and an overall budget that fits Vercel's 60s function limit.
 const CALL_TIMEOUT_MS = 25_000
@@ -36,6 +36,8 @@ export interface ChatResult {
   text: string
   provider: string
   model: string
+  /** Which chain step answered, e.g. "step 2 (Groq key 1)". */
+  step: string
   usage?: UnifiedUsage
 }
 
@@ -50,7 +52,7 @@ interface GeminiResponse {
 }
 
 type Env = Record<string, string | undefined>
-type Caller = (req: ChatRequest, model: string, apiKey: string) => Promise<ChatResult>
+type Caller = (req: ChatRequest, model: string, apiKey: string) => Promise<Omit<ChatResult, 'step'>>
 
 class ProviderError extends Error {
   constructor(message: string, readonly status?: number) {
@@ -58,7 +60,7 @@ class ProviderError extends Error {
   }
 }
 
-async function callClaude(req: ChatRequest, model: string, apiKey: string): Promise<ChatResult> {
+async function callClaude(req: ChatRequest, model: string, apiKey: string): Promise<Omit<ChatResult, 'step'>> {
   const client = new Anthropic({ apiKey, maxRetries: 0, timeout: CALL_TIMEOUT_MS })
   try {
     const res = await client.messages.create({
@@ -93,7 +95,7 @@ async function callClaude(req: ChatRequest, model: string, apiKey: string): Prom
   }
 }
 
-async function callGroq(req: ChatRequest, model: string, apiKey: string): Promise<ChatResult> {
+async function callGroq(req: ChatRequest, model: string, apiKey: string): Promise<Omit<ChatResult, 'step'>> {
   const res = await fetch(GROQ_URL, {
     method: 'POST',
     headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
@@ -102,7 +104,9 @@ async function callGroq(req: ChatRequest, model: string, apiKey: string): Promis
       messages: [{ role: 'system', content: req.system }, ...req.messages],
       temperature: 0.5,
       // gpt-oss spends tokens on hidden reasoning — leave headroom.
-      max_tokens: req.maxTokens ?? 2048,
+      max_completion_tokens: req.maxTokens ?? 2048,
+      // Chat doesn't need deep reasoning; qwen's default is already instruct mode.
+      ...(model.startsWith('openai/gpt-oss') && { reasoning_effort: 'low' }),
     }),
     signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
   })
@@ -125,7 +129,7 @@ async function callGroq(req: ChatRequest, model: string, apiKey: string): Promis
   }
 }
 
-async function callGemini(req: ChatRequest, model: string, apiKey: string): Promise<ChatResult> {
+async function callGemini(req: ChatRequest, model: string, apiKey: string): Promise<Omit<ChatResult, 'step'>> {
   const res = await fetch(`${GEMINI_URL}/${model}:generateContent`, {
     method: 'POST',
     headers: { 'x-goog-api-key': apiKey, 'content-type': 'application/json' },
@@ -136,7 +140,7 @@ async function callGemini(req: ChatRequest, model: string, apiKey: string): Prom
         parts: [{ text: m.content }],
       })),
       generationConfig: {
-        temperature: 0.5,
+        // No temperature: Gemini 3.6+ ignores it.
         maxOutputTokens: req.maxTokens ?? 2048,
         // Default thinking is slow (~1 min); low keeps it inside the time budget.
         thinkingConfig: { thinkingLevel: 'low' },
@@ -169,13 +173,13 @@ async function callGemini(req: ChatRequest, model: string, apiKey: string): Prom
   }
 }
 
-function chain(env: Env): { name: string; key?: string; models: string[]; call: Caller }[] {
+function chain(env: Env): { name: string; label: string; key?: string; models: string[]; call: Caller }[] {
   return [
-    { name: 'anthropic', key: env.ANTHROPIC_API_KEY, models: CLAUDE_MODELS, call: callClaude },
-    { name: 'groq #1', key: env.GROQ_API_KEY, models: GROQ_MODELS, call: callGroq },
-    { name: 'groq #2', key: env.GROQ_API_KEY_2, models: GROQ_MODELS, call: callGroq },
-    { name: 'gemini #1', key: env.GEMINI_API_KEY, models: GEMINI_MODELS, call: callGemini },
-    { name: 'gemini #2', key: env.GEMINI_API_KEY_2, models: GEMINI_MODELS, call: callGemini },
+    { name: 'anthropic', label: 'step 1', key: env.ANTHROPIC_API_KEY, models: CLAUDE_MODELS, call: callClaude },
+    { name: 'groq #1', label: 'step 2 (Groq key 1)', key: env.GROQ_API_KEY, models: GROQ_MODELS, call: callGroq },
+    { name: 'groq #2', label: 'step 3 (Groq key 2)', key: env.GROQ_API_KEY_2, models: GROQ_MODELS, call: callGroq },
+    { name: 'gemini #1', label: 'step 4 (Gemini key 1)', key: env.GEMINI_API_KEY, models: GEMINI_MODELS, call: callGemini },
+    { name: 'gemini #2', label: 'step 5 (Gemini key 2)', key: env.GEMINI_API_KEY_2, models: GEMINI_MODELS, call: callGemini },
   ]
 }
 
@@ -188,7 +192,9 @@ export async function chat(req: ChatRequest, env: Env): Promise<ChatResult> {
     for (const model of step.models) {
       if (Date.now() > deadline) throw lastErr
       try {
-        return await step.call(req, model, apiKey)
+        const result = { ...(await step.call(req, model, apiKey)), step: step.label }
+        console.log(`chat answered: ${result.provider} · ${result.model} · ${result.step}`)
+        return result
       } catch (err) {
         lastErr = err
         console.error(`chat ${step.name} ${model}:`, (err as Error)?.message || err)

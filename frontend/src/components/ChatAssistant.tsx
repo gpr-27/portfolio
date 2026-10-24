@@ -49,7 +49,10 @@ export function ChatAssistant() {
         if (!res.ok) throw new Error('bad response')
         const data = await res.json()
         const reply = data.reply ?? data.answer ?? ''
-        const model = typeof data.model === 'string' && data.model ? data.model : undefined
+        const model =
+          typeof data.model === 'string' && data.model
+            ? `Model: ${[data.provider, data.model, data.step].filter((x) => typeof x === 'string' && x).join(' · ')}`
+            : undefined
         setMessages((m) => [...m, { role: 'assistant', content: reply || '…', model }])
       } else {
         // Offline, on-page-only fallback with a natural beat.

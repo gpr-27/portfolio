@@ -94,7 +94,7 @@ export function buildKnowledge(): string {
     `## Education\n${education.school}, ${education.degree}, ${education.period} (${education.location}). ${education.grades}.\nCoursework: ${courses}.`,
     `## Experience\n${work}`,
     `## Projects (${projects.length})\n${projs}`,
-    `## Headline results on the site\n91.71% accuracy after fine-tuning Llama 3.2 3B on financial tweets (vs 42% with 3-shot prompting); 99.45% binary accuracy catching FDM 3D-print defects with CNNs.`,
+    `## Headline results on the site\n91.71% accuracy after fine-tuning Llama 3.2 3B on financial tweets (vs 42% with 3-shot prompting); 99.68% binary accuracy catching FDM 3D-print defects with CNNs; a real-time chat platform (Flick) with no lost or duplicate messages.`,
     `## Skills\n${skillGroups.map((g) => `${g.label}: ${list(g.items)}`).join('\n')}`,
     `## Achievements\n${achievement.title} at ${achievement.org} (${achievement.year}): ${achievement.points.join(' ')}`,
     `## Programs\n${programs.map((p) => `${p.title} (${p.org}, ${p.date}): ${p.note}`).join('\n')}`,

@@ -48,9 +48,9 @@ export const profile = {
     'AI Agents',
     'LLM Fine-Tuning',
     'RAG Systems',
-    'Generative AI',
+    'Backend & Full-Stack',
   ],
-  bio: 'Computer Science undergraduate at IIIT Tiruchirapalli, passionate about machine learning, generative AI, and AI agents. I train and fine-tune models, build LLM-powered agents and RAG pipelines, and develop end-to-end ML solutions for real-world problems.',
+  bio: 'Computer Science undergraduate at IIIT Tiruchirappalli who likes taking AI from idea to deployed product: fine-tuning and serving models, building agentic RAG and tool-calling systems, and shipping backend and full-stack systems, including a real-time messaging platform.',
   email: 'praneethg1830@gmail.com',
   availability: 'Open to internships & research collaborations',
 }
@@ -88,9 +88,9 @@ export const socials: SocialLink[] = [
 export const education = {
   school: 'IIIT Tiruchirapalli',
   degree: 'B.Tech, Computer Science & Engineering',
-  period: '2023 – 2027',
+  period: '2023 – 2027 (expected)',
   location: 'Trichy, Tamil Nadu',
-  grades: 'CGPA 8.96 / 10 · Semester 5 GPA 9.38 / 10',
+  grades: 'CGPA 8.96 / 10',
 }
 
 export const experience: Experience[] = [
@@ -100,11 +100,10 @@ export const experience: Experience[] = [
     period: 'Jun 2026 – Present',
     focus: 'Quant ML',
     points: [
-      'Built a production forecast aggregation layer for multi-strategy trading signals using weighted ensemble voting, conflict resolution, and regime-aware routing.',
-      'Integrated production XGBoost and LightGBM models with an MLflow-based serving pipeline, enabling low-latency online inference with offline fallback.',
-      'Defined feature-schema contracts, offline replay pipelines, and inference APIs over structured market data; validated with 368 automated pytest cases while meeting a p99 latency under 50 ms.',
+      'Built a forecast-aggregation layer for multi-strategy trading signals: ensemble voting, conflict resolution, regime-aware routing.',
+      'Served XGBoost/LightGBM models via an MLflow pipeline with schema contracts and offline replay at p99 latency under 50 ms.',
     ],
-    stack: ['XGBoost', 'LightGBM', 'MLflow', 'Python', 'pytest'],
+    stack: ['XGBoost', 'LightGBM', 'MLflow', 'Python'],
   },
   {
     company: 'Magnivo AI',
@@ -112,10 +111,8 @@ export const experience: Experience[] = [
     period: 'May 2026 – Jun 2026',
     focus: 'Multi-Agent Systems',
     points: [
-      'Shipped a production multi-agent GTM automation platform built on specialized LLM agents for lead discovery, enrichment, personalized outreach, and campaign execution.',
-      'Engineered the prompt engineering and tool-calling layer behind each agent, adding structured outputs, schema validation, and retry/fallback handling to keep multi-step runs reliable on unstructured web data.',
-      'Orchestrated agent workflows with shared state and integrations including SerpAPI, Hunter, Gmail, and Instantly; validated production reliability with 152 automated tests.',
-      'Integrated the platform with Next.js, Clerk, Supabase, and Render, enabling CRM synchronization, automated outreach campaigns, and engagement analytics.',
+      'Shipped a production multi-agent GTM platform where specialised LLM agents discover, enrich, and contact leads end to end.',
+      'Engineered the tool-calling layer (structured outputs, schema validation, retry/fallback) and integrated SerpAPI, Hunter, Gmail, and Instantly on a Next.js, Clerk, Supabase, and Render stack.',
     ],
     stack: ['LLM Agents', 'Tool Calling', 'Next.js', 'Clerk', 'Supabase', 'Render'],
   },
@@ -125,9 +122,8 @@ export const experience: Experience[] = [
     period: 'Jan 2026 – Apr 2026',
     focus: 'Surface Metrology',
     points: [
-      'Researched additive-manufactured surface metrology, evaluating nonlinear least-squares mean-line fitting and morphological filtering for surface roughness characterization.',
-      'Developed an end-to-end Python evaluation pipeline using NumPy and SciPy to benchmark both methods across 19 stainless-steel optical profiler scans with standardized preprocessing.',
-      'Found mean-line fitting achieved 3× higher consistency than envelope filtering, reducing Sa variability from 77.5% to 23.7% and identifying failure cases on spatter-heavy surfaces.',
+      'Benchmarked mean-line fitting vs. morphological filtering for additive-manufactured surface roughness on 19 profiler scans.',
+      'Built the NumPy/SciPy evaluation pipeline; found mean-line fitting 3x more consistent, cutting Sa variability from 77.5% to 23.7%.',
     ],
     stack: ['Python', 'NumPy', 'SciPy', 'Research'],
   },
@@ -135,66 +131,73 @@ export const experience: Experience[] = [
 
 export const skillGroups: SkillGroup[] = [
   {
-    label: 'GenAI & LLMs',
+    label: 'LLMs & Agents',
     feature: true,
     items: [
-      'Prompt Engineering',
-      'LLM APIs (OpenAI, Claude, Gemini)',
-      'Tool Calling',
-      'MCP',
       'RAG',
-      'Agentic RAG',
       'FAISS',
-      'Fine-Tuning (PEFT, QLoRA)',
+      'Fine-Tuning (QLoRA, PEFT, Unsloth)',
       'Hugging Face',
-    ],
-  },
-  {
-    label: 'Agentic AI',
-    feature: true,
-    items: [
-      'Multi-Agent Systems',
-      'Agent Orchestration',
+      'Tool Calling',
+      'Structured Outputs',
+      'MCP',
       'LangChain',
       'LangGraph',
-      'Claude Agent SDK',
       'Vercel AI SDK',
+      'Prompt Engineering',
+      'Evals & Guardrails',
     ],
   },
   {
-    label: 'Machine Learning',
+    label: 'ML & Data Science',
+    feature: true,
     items: [
       'PyTorch',
-      'TensorFlow',
       'Scikit-learn',
-      'NumPy',
+      'XGBoost',
+      'LightGBM',
       'Pandas',
-      'NLP',
+      'NumPy',
+      'SciPy',
+      'MLflow',
       'Computer Vision',
-      'Transfer Learning',
+      'NLP',
     ],
+  },
+  {
+    label: 'Backend & APIs',
+    items: [
+      'Node.js',
+      'Express.js',
+      'Fastify',
+      'FastAPI',
+      'REST API design',
+      'WebSockets (Socket.IO)',
+      'SSE',
+      'OAuth 2.1 / PKCE',
+    ],
+  },
+  {
+    label: 'Databases',
+    items: ['PostgreSQL', 'Redis', 'MongoDB', 'Supabase'],
+  },
+  {
+    label: 'Frontend & DevOps',
+    items: ['React', 'Next.js', 'Docker', 'Git', 'GitHub Actions (CI)', 'Linux', 'Vercel', 'Render'],
   },
   {
     label: 'Languages',
-    items: ['Python', 'C++', 'Java', 'JavaScript', 'TypeScript', 'SQL'],
+    items: ['Python', 'TypeScript', 'JavaScript', 'Java', 'C++', 'SQL'],
   },
   {
-    label: 'Web & Backend',
-    items: ['FastAPI', 'Node.js', 'Express.js', 'REST APIs', 'React', 'Next.js'],
-  },
-  {
-    label: 'Databases & Tools',
+    label: 'Core CS',
     items: [
-      'MongoDB',
-      'PostgreSQL',
-      'Supabase',
-      'Redis',
-      'Git',
-      'Docker',
-      'Linux',
-      'GitHub Actions',
-      'Vercel',
-      'Render',
+      'Data Structures & Algorithms',
+      'OOP',
+      'Concurrency',
+      'System Design',
+      'Idempotency & Ordering',
+      'Retries',
     ],
   },
 ]
@@ -225,9 +228,9 @@ export const coursework = {
 export const achievement = {
   title: '1st Place, Hackathon',
   org: 'IIIT Tiruchirapalli',
-  year: '2025',
+  year: 'Oct 2025',
   points: [
-    'Designed and built an AI study assistant in 72 hours with conversational NLP for personalized learning.',
+    'Built an AI study assistant in a 72-hour hackathon; it grew into Study Assistant Hub.',
   ],
 }
 
@@ -236,7 +239,7 @@ export const programs = [
     title: 'Amazon ML Summer School 2026',
     org: 'Amazon',
     date: 'Jul 2026 – Aug 2026',
-    note: 'Integrated learning program on core machine learning concepts and their real-world applications.',
+    note: 'Selected for Amazon’s competitive ML training programme.',
   },
 ]
 
@@ -258,7 +261,7 @@ export const certifications: Certification[] = [
 /** The About letter, in the first person. Shown on the page and given to the assistant. */
 export const letter = {
   opening:
-    'I’m Praneeth, a computer science student at IIIT Tiruchirappalli (B.Tech, 2023–2027). I hold a CGPA of 8.96 and scored 9.38 in my fifth semester.',
+    'I’m Praneeth, a computer science student at IIIT Tiruchirappalli (B.Tech, 2023–2027). I hold a CGPA of 8.96.',
   closing:
     'I’m looking for internships and research collaborations in applied AI. If you’re building with models, I would like to hear from you.',
   signoff: 'AI/ML engineer, Tiruchirappalli',

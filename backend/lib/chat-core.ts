@@ -24,6 +24,7 @@ export interface ChatResponse {
   reply: string
   provider?: string
   model?: string
+  step?: string
   usage?: UnifiedUsage
 }
 
@@ -72,7 +73,7 @@ export async function handleChat(body: ChatBody, env: Env): Promise<ChatResponse
     console.error('chat error:', (err as Error)?.message || err)
     throw new ChatUnavailableError()
   }
-  const { text: reply, provider, model, usage } = result
+  const { text: reply, provider, model, step, usage } = result
 
   const question = [...trimmed].reverse().find((m) => m.role === 'user')?.content ?? ''
   await logToMongo(env, {
@@ -81,9 +82,10 @@ export async function handleChat(body: ChatBody, env: Env): Promise<ChatResponse
     answer: reply,
     provider,
     model,
+    step,
     usage,
     createdAt: new Date(),
   })
 
-  return { reply, provider, model, usage }
+  return { reply, provider, model, step, usage }
 }
